@@ -2927,6 +2927,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(11);
+var player_1 = __webpack_require__(37);
 var StartScene = (function (_super) {
     __extends(StartScene, _super);
     function StartScene() {
@@ -2939,8 +2940,12 @@ var StartScene = (function (_super) {
         if (this.initialized)
             return;
         this.initialized = true;
-        var camera = this.camera = new engine_1.Camera(this);
-        camera.clearColor = 'black';
+        this.addObject(new engine_1.GameObject('Random'));
+        var player = new player_1.PlayerObject();
+        this.addObject(player);
+        var camera = this.camera = new engine_1.FollowCamera(this);
+        camera.follow = player;
+        camera.clearColor = '#2d91c2';
     };
     return StartScene;
 }(engine_1.GameScene));
@@ -5214,6 +5219,65 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(11);
+var merge = __webpack_require__(34);
+var PlayerObject = (function (_super) {
+    __extends(PlayerObject, _super);
+    function PlayerObject(opts) {
+        var _this = _super.call(this, 'Player', merge({
+            sprite: {
+                src: '/img/player.png',
+                pivot: { x: 32, y: 86 }
+            }
+        }, opts)) || this;
+        _this.MOVE_FORCE_MAGNITUDE = 4;
+        _this.mask = new engine_1.CircleCollisionMask(_this, 32, [0, -32]);
+        return _this;
+    }
+    PlayerObject.prototype.addToScene = function (scene) {
+        _super.prototype.addToScene.call(this, scene);
+        this.game.renderPhysics = true;
+    };
+    PlayerObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        var hdelta = 0, vdelta = 0;
+        if (this.events.isKeyDown('ArrowLeft'))
+            hdelta -= 1;
+        if (this.events.isKeyDown('ArrowRight'))
+            hdelta += 1;
+        if (this.events.isKeyDown('ArrowUp'))
+            vdelta += 1;
+        if (this.events.isKeyDown('ArrowDown'))
+            vdelta -= 1;
+        var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
+        if (dist > 1) {
+            hdelta /= dist;
+            vdelta /= dist;
+        }
+        this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, vdelta * this.MOVE_FORCE_MAGNITUDE);
+    };
+    return PlayerObject;
+}(engine_1.GameObject));
+exports.PlayerObject = PlayerObject;
 
 
 /***/ })
