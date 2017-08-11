@@ -2904,9 +2904,22 @@ exports.Rect = Rect;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(11);
 var my_game_1 = __webpack_require__(14);
 var game = new my_game_1.MyGame();
 game.start();
+var kbProvider = new engine_1.KeyboardAbstractButtonProvider(game.eventQueue);
+game.eventQueue.addAbstractButtonProvider(kbProvider);
+kbProvider.bindAbstractButton('left', 'ArrowLeft', 'KeyA');
+kbProvider.bindAbstractButton('right', 'ArrowRight', 'KeyD');
+kbProvider.bindAbstractButton('up', 'ArrowUp', 'KeyW');
+kbProvider.bindAbstractButton('down', 'ArrowDown', 'KeyS');
+var gpProvider = new engine_1.GamepadAbstractButtonProvider(game.eventQueue);
+game.eventQueue.addAbstractButtonProvider(gpProvider);
+gpProvider.bindAbstractButton('left', 'DPadLeft', 'LeftStickLeft');
+gpProvider.bindAbstractButton('right', 'DPadRight', 'LeftStickRight');
+gpProvider.bindAbstractButton('up', 'DPadUp', 'LeftStickUp');
+gpProvider.bindAbstractButton('down', 'DPadDown', 'LeftStickDown');
 
 
 /***/ }),
@@ -5260,14 +5273,14 @@ var PlayerObject = (function (_super) {
     PlayerObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
         var hdelta = 0, vdelta = 0;
-        if (this.events.isKeyDown('ArrowLeft'))
+        if (this.events.isAbstractButtonDown('left'))
             hdelta -= 1;
-        if (this.events.isKeyDown('ArrowRight'))
+        if (this.events.isAbstractButtonDown('right'))
             hdelta += 1;
-        if (this.events.isKeyDown('ArrowUp'))
-            vdelta += 1;
-        if (this.events.isKeyDown('ArrowDown'))
+        if (this.events.isAbstractButtonDown('up'))
             vdelta -= 1;
+        if (this.events.isAbstractButtonDown('down'))
+            vdelta += 1;
         var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
         if (dist > 1) {
             hdelta /= dist;

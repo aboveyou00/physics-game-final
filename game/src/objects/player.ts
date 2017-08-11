@@ -23,10 +23,10 @@ export class PlayerObject extends GameObject {
         super.tick(delta);
         
         let hdelta = 0, vdelta = 0;
-        if (this.events.isKeyDown('ArrowLeft')) hdelta -= 1;
-        if (this.events.isKeyDown('ArrowRight')) hdelta += 1;
-        if (this.events.isKeyDown('ArrowUp')) vdelta += 1;
-        if (this.events.isKeyDown('ArrowDown')) vdelta -= 1;
+        if (this.events.isAbstractButtonDown('left')) hdelta -= 1;
+        if (this.events.isAbstractButtonDown('right')) hdelta += 1;
+        if (this.events.isAbstractButtonDown('up')) vdelta -= 1;
+        if (this.events.isAbstractButtonDown('down')) vdelta += 1;
         let dist = pointDistance(0, 0, hdelta, vdelta);
         if (dist > 1) {
             hdelta /= dist;
