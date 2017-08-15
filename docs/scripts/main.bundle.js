@@ -5235,6 +5235,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(1);
 var player_1 = __webpack_require__(34);
 var mountain_1 = __webpack_require__(38);
+var speed_scale_camera_1 = __webpack_require__(39);
 var StartScene = (function (_super) {
     __extends(StartScene, _super);
     function StartScene() {
@@ -5252,7 +5253,7 @@ var StartScene = (function (_super) {
         this.addObject(player);
         var mountain = new mountain_1.MountainObject();
         this.addObject(mountain);
-        var camera = this.camera = new engine_1.FollowCamera(this);
+        var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
         camera.follow = player;
         camera.clearColor = '#2d91c2';
@@ -5390,6 +5391,48 @@ var MountainObject = (function (_super) {
     return MountainObject;
 }(engine_1.GameObject));
 exports.MountainObject = MountainObject;
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(1);
+var SpeedScaleCamera = (function (_super) {
+    __extends(SpeedScaleCamera, _super);
+    function SpeedScaleCamera(scene) {
+        var _this = _super.call(this, scene) || this;
+        _this.zoomScaleTo = 30;
+        _this.fixedTickTime = 1 / 30;
+        return _this;
+    }
+    SpeedScaleCamera.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        if (this.follow) {
+            this.zoomScaleTo = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+        }
+        this.fixedTickTime -= delta;
+        while (this.fixedTickTime < 0) {
+            this.fixedTickTime += 1 / 30;
+            this.zoomScale = ((this.zoomScale * 9) + (this.zoomScaleTo * 1)) / 10;
+        }
+    };
+    return SpeedScaleCamera;
+}(engine_1.FollowCamera));
+exports.SpeedScaleCamera = SpeedScaleCamera;
 
 
 /***/ })

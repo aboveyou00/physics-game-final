@@ -1,6 +1,7 @@
 import { GameScene, FollowCamera, GameObject } from 'engine';
 import { PlayerObject, SCALE } from '../objects/player';
 import { MountainObject } from '../objects/mountain';
+import { SpeedScaleCamera } from '../cameras/speed-scale-camera';
 
 export class StartScene extends GameScene {
     constructor() {
@@ -23,7 +24,7 @@ export class StartScene extends GameScene {
         let mountain = new MountainObject();
         this.addObject(mountain);
 
-        let camera = this.camera = new FollowCamera(this);
+        let camera = this.camera = new SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
         camera.follow = player;
         camera.clearColor = '#2d91c2'; //#1e528e
