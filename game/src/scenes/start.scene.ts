@@ -1,5 +1,6 @@
 import { GameScene, FollowCamera, GameObject } from 'engine';
 import { PlayerObject, SCALE } from '../objects/player';
+import { MountainObject } from '../objects/mountain';
 
 export class StartScene extends GameScene {
     constructor() {
@@ -18,6 +19,9 @@ export class StartScene extends GameScene {
 
         let player = new PlayerObject();
         this.addObject(player);
+        
+        let mountain = new MountainObject();
+        this.addObject(mountain);
 
         let camera = this.camera = new FollowCamera(this);
         camera.floorCenterPosition = false;

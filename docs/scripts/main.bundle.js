@@ -5234,6 +5234,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(1);
 var player_1 = __webpack_require__(34);
+var mountain_1 = __webpack_require__(38);
 var StartScene = (function (_super) {
     __extends(StartScene, _super);
     function StartScene() {
@@ -5249,6 +5250,8 @@ var StartScene = (function (_super) {
         this.addObject(new engine_1.GameObject('Random'));
         var player = new player_1.PlayerObject();
         this.addObject(player);
+        var mountain = new mountain_1.MountainObject();
+        this.addObject(mountain);
         var camera = this.camera = new engine_1.FollowCamera(this);
         camera.floorCenterPosition = false;
         camera.follow = player;
@@ -5315,6 +5318,78 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(1);
+var MountainObject = (function (_super) {
+    __extends(MountainObject, _super);
+    function MountainObject(opts) {
+        var _this = _super.call(this, 'Mountain', opts) || this;
+        _this.RISING_EDGE_WEIGHT = Math.random() * 1.2;
+        _this.FALLING_EDGE_WEIGHT = Math.random() * 1.2;
+        _this.init();
+        return _this;
+    }
+    MountainObject.prototype.init = function () {
+        var fromx = -50;
+        var tox = 300;
+        var offy = [];
+        for (var q = Math.floor(fromx / 10); q < Math.floor(tox / 10); q++) {
+            offy.push(Math.random() * 15);
+        }
+        this.data = [];
+        for (var q = fromx; q < tox; q++) {
+            var offh = (q - fromx) / 10;
+            var offhBase = Math.floor(offh);
+            var off = offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT + offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT;
+            this.data.push([q * 2, q + Math.random() * .4 + off]);
+        }
+    };
+    MountainObject.prototype.renderImpl = function (adapter) {
+        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
+            this.renderImplContext2d(adapter);
+        else
+            throw new Error('Not implemented');
+    };
+    MountainObject.prototype.renderImplContext2d = function (adapter) {
+        var context = adapter.context;
+        context.fillStyle = '#D2691E';
+        context.strokeStyle = '#964B00';
+        context.beginPath();
+        var maxy = this.data[0][1];
+        context.moveTo(this.data[0][0], this.data[0][1]);
+        for (var q = 1; q < this.data.length; q++) {
+            var _a = this.data[q], x = _a[0], y = _a[1];
+            if (y > maxy)
+                maxy = y;
+            context.lineTo(x, y);
+        }
+        context.lineTo(this.data[this.data.length - 1][0] + 20, maxy + 20);
+        context.lineTo(this.data[0][0] - 20, maxy + 20);
+        context.closePath();
+        context.fill();
+        context.stroke();
+    };
+    return MountainObject;
+}(engine_1.GameObject));
+exports.MountainObject = MountainObject;
 
 
 /***/ })
