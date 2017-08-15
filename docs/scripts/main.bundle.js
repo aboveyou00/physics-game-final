@@ -5184,7 +5184,7 @@ var PlayerObject = (function (_super) {
             },
             imageScale: 1 / exports.SCALE
         }, opts)) || this;
-        _this.MOVE_FORCE_MAGNITUDE = 4;
+        _this.MOVE_FORCE_MAGNITUDE = .5;
         _this.mask = new engine_1.CircleCollisionMask(_this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
         return _this;
     }
@@ -5248,7 +5248,8 @@ var StartScene = (function (_super) {
         if (this.initialized)
             return;
         this.initialized = true;
-        this.addObject(new engine_1.GameObject('Random'));
+        this.addForceGenerator(new engine_1.GravityForceGenerator(9.8));
+        this.addForceGenerator(new engine_1.DragForceGenerator(.2, 2));
         var player = new player_1.PlayerObject();
         this.addObject(player);
         var mountain = new mountain_1.MountainObject();

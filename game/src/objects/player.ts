@@ -15,7 +15,7 @@ export class PlayerObject extends GameObject {
         this.mask = new CircleCollisionMask(this, 32 / SCALE, [0, -32 / SCALE]);
     }
 
-    private MOVE_FORCE_MAGNITUDE = 4;
+    private MOVE_FORCE_MAGNITUDE = .5;
 
     addToScene(scene: GameScene) {
         super.addToScene(scene);

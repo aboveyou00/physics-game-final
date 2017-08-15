@@ -1,4 +1,4 @@
-import { GameScene, FollowCamera, GameObject } from 'engine';
+import { GameScene, FollowCamera, GameObject, GravityForceGenerator, DragForceGenerator } from 'engine';
 import { PlayerObject, SCALE } from '../objects/player';
 import { MountainObject } from '../objects/mountain';
 import { SpeedScaleCamera } from '../cameras/speed-scale-camera';
@@ -15,8 +15,9 @@ export class StartScene extends GameScene {
 
         if (this.initialized) return;
         this.initialized = true;
-
-        this.addObject(new GameObject('Random')); //Just to show the player movement
+        
+        this.addForceGenerator(new GravityForceGenerator(9.8));
+        this.addForceGenerator(new DragForceGenerator(.2, 2));
 
         let player = new PlayerObject();
         this.addObject(player);
