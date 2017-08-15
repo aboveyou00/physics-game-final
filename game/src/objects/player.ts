@@ -1,15 +1,18 @@
 import { GameObject, GameObjectOptions, CircleCollisionMask, GameScene, pointDistance } from 'engine';
 import merge = require('lodash.merge');
 
+export const SCALE = 30;
+
 export class PlayerObject extends GameObject {
     constructor(opts?: GameObjectOptions) {
         super('Player', merge({
             sprite: {
                 src: '/img/player.png',
                 pivot: { x: 32, y: 86 }
-            }
+            },
+            imageScale: 1 / SCALE
         }, opts));
-        this.mask = new CircleCollisionMask(this, 32, [0, -32]);
+        this.mask = new CircleCollisionMask(this, 32 / SCALE, [0, -32 / SCALE]);
     }
 
     private MOVE_FORCE_MAGNITUDE = 4;
