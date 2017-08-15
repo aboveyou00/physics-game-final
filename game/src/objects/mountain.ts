@@ -1,4 +1,5 @@
 import { GameObject, GameObjectOptions, GraphicsAdapter, DefaultGraphicsAdapter } from 'engine';
+import { MountainCollisionMask } from '../physics/mountain-collision-mask';
 
 export class MountainObject extends GameObject {
     constructor(opts?: GameObjectOptions) {
@@ -10,7 +11,7 @@ export class MountainObject extends GameObject {
     private FALLING_EDGE_WEIGHT = Math.random() * 1.2;
     private BUMPINESS = .4 + Math.random() * .8;
     
-    private data: [number, number][];
+    data: [number, number][];
     private init() {
         let fromx = -50;
         let tox = 300;
@@ -25,6 +26,7 @@ export class MountainObject extends GameObject {
             let off = offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT + offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT;
             this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
         }
+        this.mask = new MountainCollisionMask(this);
     }
     
     get maximumY() {

@@ -25,8 +25,8 @@ export class StartScene extends GameScene {
         let backdrop = new BackdropObject(mountain);
         
         this.addObject(backdrop);
-        this.addObject(player);
         this.addObject(mountain);
+        this.addObject(player);
 
         let camera = this.camera = new SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
