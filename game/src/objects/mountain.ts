@@ -8,6 +8,7 @@ export class MountainObject extends GameObject {
     
     private RISING_EDGE_WEIGHT = Math.random() * 1.2;
     private FALLING_EDGE_WEIGHT = Math.random() * 1.2;
+    private BUMPINESS = .4 + Math.random() * .8;
     
     private data: [number, number][];
     private init() {
@@ -22,8 +23,17 @@ export class MountainObject extends GameObject {
             let offh = (q - fromx) / 10;
             let offhBase = Math.floor(offh);
             let off = offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT + offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT;
-            this.data.push([q * 2, q + Math.random() * .4 + off]);
+            this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
         }
+    }
+    
+    get maximumY() {
+        let maxy = this.data[0][1];
+        for (let q = 1; q < this.data.length; q++) {
+            let [x, y] = this.data[q];
+            if (y > maxy) maxy = y;
+        }
+        return maxy;
     }
     
     renderImpl(adapter: GraphicsAdapter) {

@@ -5233,6 +5233,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(1);
+var backdrop_1 = __webpack_require__(40);
 var player_1 = __webpack_require__(34);
 var mountain_1 = __webpack_require__(38);
 var speed_scale_camera_1 = __webpack_require__(39);
@@ -5251,13 +5252,15 @@ var StartScene = (function (_super) {
         this.addForceGenerator(new engine_1.GravityForceGenerator(9.8));
         this.addForceGenerator(new engine_1.DragForceGenerator(.2, 2));
         var player = new player_1.PlayerObject();
-        this.addObject(player);
         var mountain = new mountain_1.MountainObject();
+        var backdrop = new backdrop_1.BackdropObject(mountain);
+        this.addObject(backdrop);
+        this.addObject(player);
         this.addObject(mountain);
         var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
         camera.follow = player;
-        camera.clearColor = '#2d91c2';
+        camera.clearColor = '';
         camera.maxZoomScale = 400;
         camera.minZoomScale = 1;
         camera.zoomScale = player_1.SCALE;
@@ -5346,6 +5349,7 @@ var MountainObject = (function (_super) {
         var _this = _super.call(this, 'Mountain', opts) || this;
         _this.RISING_EDGE_WEIGHT = Math.random() * 1.2;
         _this.FALLING_EDGE_WEIGHT = Math.random() * 1.2;
+        _this.BUMPINESS = .4 + Math.random() * .8;
         _this.init();
         return _this;
     }
@@ -5361,9 +5365,22 @@ var MountainObject = (function (_super) {
             var offh = (q - fromx) / 10;
             var offhBase = Math.floor(offh);
             var off = offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT + offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT;
-            this.data.push([q * 2, q + Math.random() * .4 + off]);
+            this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
         }
     };
+    Object.defineProperty(MountainObject.prototype, "maximumY", {
+        get: function () {
+            var maxy = this.data[0][1];
+            for (var q = 1; q < this.data.length; q++) {
+                var _a = this.data[q], x = _a[0], y = _a[1];
+                if (y > maxy)
+                    maxy = y;
+            }
+            return maxy;
+        },
+        enumerable: true,
+        configurable: true
+    });
     MountainObject.prototype.renderImpl = function (adapter) {
         if (adapter instanceof engine_1.DefaultGraphicsAdapter)
             this.renderImplContext2d(adapter);
@@ -5434,6 +5451,58 @@ var SpeedScaleCamera = (function (_super) {
     return SpeedScaleCamera;
 }(engine_1.FollowCamera));
 exports.SpeedScaleCamera = SpeedScaleCamera;
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(1);
+var BackdropObject = (function (_super) {
+    __extends(BackdropObject, _super);
+    function BackdropObject(mountain, opts) {
+        var _this = _super.call(this, 'Backdrop', opts) || this;
+        _this.mountain = mountain;
+        _this.SKY_TOP = '#2d91c2';
+        _this.SKY_BOTTOM = '#1e528e';
+        _this.GROUND = '#AB5A0F';
+        return _this;
+    }
+    BackdropObject.prototype.renderImpl = function (adapter) {
+        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
+            this.renderImplContext2d(adapter);
+        else
+            throw new Error('Not implemented');
+    };
+    BackdropObject.prototype.renderImplContext2d = function (adapter) {
+        var bounds = this.scene.camera.bounds;
+        var maxy = this.mountain.maximumY;
+        var descent = engine_1.clamp(bounds.top / maxy, 0, 1);
+        var context = adapter.context;
+        var gradient = context.createLinearGradient(bounds.left, bounds.bottom, bounds.left, bounds.top);
+        gradient.addColorStop(0, this.SKY_TOP);
+        gradient.addColorStop(1, this.SKY_BOTTOM);
+        context.fillStyle = gradient;
+        context.fillRect(bounds.left, bounds.bottom, bounds.right - bounds.left, bounds.top - bounds.bottom);
+        context.fillStyle = this.GROUND;
+        context.fillRect(bounds.left, bounds.top - (bounds.top - bounds.bottom) * (.1 + .2 * descent), bounds.right - bounds.left, bounds.top - bounds.bottom);
+    };
+    return BackdropObject;
+}(engine_1.GameObject));
+exports.BackdropObject = BackdropObject;
 
 
 /***/ })
