@@ -2,6 +2,7 @@ import { GameScene, FollowCamera, GameObject, GravityForceGenerator, DragForceGe
 import { BackdropObject } from '../objects/backdrop';
 import { PlayerObject, SCALE } from '../objects/player';
 import { MountainObject } from '../objects/mountain';
+import { BoulderControllerObject } from '../objects/boulder-controller';
 import { SpeedScaleCamera } from '../cameras/speed-scale-camera';
 
 export class StartScene extends GameScene {
@@ -18,15 +19,17 @@ export class StartScene extends GameScene {
         this.initialized = true;
         
         this.addForceGenerator(new GravityForceGenerator(9.8));
-        this.addForceGenerator(new DragForceGenerator(.2, 2));
+        this.addForceGenerator(new DragForceGenerator(.05, .5));
 
         let player = new PlayerObject();
         let mountain = new MountainObject();
+        let boulderController = new BoulderControllerObject(player, mountain);
         let backdrop = new BackdropObject(mountain);
         
         this.addObject(backdrop);
         this.addObject(mountain);
         this.addObject(player);
+        this.addObject(boulderController);
 
         let camera = this.camera = new SpeedScaleCamera(this);
         camera.floorCenterPosition = false;

@@ -24,6 +24,7 @@ export class MountainCollisionMask extends CollisionMask {
                 let minx = data[0][0];
                 let maxx = data[data.length - 1][0];
                 let [otherxx, otheryy] = [other.gameObject.x + other.offset[0], other.gameObject.y + other.offset[1]];
+                if (isNaN(otherxx) || isNaN(otheryy)) throw new Error('Their position is NaN');
                 if (otherxx + other.radius < minx) return null;
                 if (otherxx - other.radius > maxx) return null;
                 
@@ -102,11 +103,13 @@ export class MountainCollisionMask extends CollisionMask {
             let eAbsorb = 1 - relativeMass;
             if (!this.isFixed || !other.isFixed) {
                 if (!this.isFixed) {
+                    if (isNaN(contact.contactNormal[0]) || isNaN(eAbsorb) || isNaN(contact.penetration)) throw new Error(`No bueno!`);
                     this.collisionImpulseX -= contact.contactNormal[0] * eAbsorb * contact.penetration;
                     this.collisionImpulseY -= contact.contactNormal[1] * eAbsorb * contact.penetration;
                     this.impulseCount++;
                 }
                 if (!other.isFixed) {
+                    if (isNaN(contact.contactNormal[0]) || isNaN(eAbsorb) || isNaN(contact.penetration)) throw new Error(`No bueno!`);
                     other.collisionImpulseX += contact.contactNormal[0] * relativeMass * contact.penetration;
                     other.collisionImpulseY += contact.contactNormal[1] * relativeMass * contact.penetration;
                     other.impulseCount++;

@@ -10,7 +10,8 @@ export class SpeedScaleCamera extends FollowCamera {
     tick(delta: number) {
         super.tick(delta);
         if (this.follow) {
-            this.zoomScaleTo = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+            let zst = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+            if (!isNaN(zst) && zst !== Infinity && zst !== -Infinity) this.zoomScaleTo = zst;
         }
         this.fixedTickTime -= delta;
         while (this.fixedTickTime < 0) {

@@ -16,14 +16,15 @@ export class MountainObject extends GameObject {
         let fromx = -50;
         let tox = 300;
         let offy = [];
-        for (let q = Math.floor(fromx / 10); q < Math.floor(tox / 10); q++) {
+        for (let q = Math.floor(fromx / 10); q < Math.floor(tox / 10) + 1; q++) {
             offy.push(Math.random() * 15);
         }
         this.data = [];
         for (let q = fromx; q < tox; q++) {
             let offh = (q - fromx) / 10;
             let offhBase = Math.floor(offh);
-            let off = offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT + offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT;
+            let off = (offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT) + (offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT);
+            if (isNaN(off)) throw new Error(`off is NaN. q: ${q}, offhBase: ${offhBase}, offy[offhBase]: ${offy[offhBase]}, offy[offhBase + 1]: ${offy[offhBase + 1]}`);
             this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
         }
         this.mask = new MountainCollisionMask(this);

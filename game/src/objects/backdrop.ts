@@ -19,6 +19,11 @@ export class BackdropObject extends GameObject {
         let maxy = this.mountain.maximumY;
         let descent = clamp(bounds.top / maxy, 0, 1);
         
+        if (isNaN(bounds.left)) {
+            console.error(`bounds are NaN!`);
+            return;
+        }
+        
         let context = adapter.context;
         let gradient = context.createLinearGradient(bounds.left, bounds.bottom, bounds.left, bounds.top);
         gradient.addColorStop(0, this.SKY_TOP);

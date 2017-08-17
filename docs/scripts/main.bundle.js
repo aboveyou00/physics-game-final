@@ -525,12 +525,16 @@ var CollisionMask = (function () {
     CollisionMask.prototype.addForce = function (x, y) {
         if (this.isFixed)
             return;
+        if (isNaN(x) || isNaN(y))
+            throw new Error('Cannot add force with NaN as a component');
         this.forceAccumX += x;
         this.forceAccumY += y;
     };
     CollisionMask.prototype.addImpulse = function (x, y) {
         if (this.isFixed)
             return;
+        if (isNaN(x) || isNaN(y))
+            throw new Error('Cannot add impulse with NaN as a component');
         this.impulseAccumX += x;
         this.impulseAccumY += y;
     };
@@ -561,6 +565,8 @@ var CollisionMask = (function () {
             var generator = _c[_b];
             generator.updateCollider(this, delta);
         }
+        if (isNaN(this.impulseAccumX))
+            console.error("impulseAccumX is NaN");
         this.gameObject.hspeed += this.forceAccumX;
         this.gameObject.vspeed += this.forceAccumY;
         this.gameObject.x += this.impulseAccumX;
@@ -4848,11 +4854,15 @@ var CircleCollisionMask = (function (_super) {
             var eAbsorb = 1 - relativeMass;
             if (this.updatePositions !== false && (!this.isFixed || !other.isFixed)) {
                 if (!this.isFixed) {
+                    if (isNaN(contact.contactNormal[0]) || isNaN(eAbsorb) || isNaN(contact.penetration))
+                        throw new Error("No bueno!");
                     this.collisionImpulseX -= contact.contactNormal[0] * eAbsorb * contact.penetration;
                     this.collisionImpulseY -= contact.contactNormal[1] * eAbsorb * contact.penetration;
                     this.impulseCount++;
                 }
                 if (!other.isFixed) {
+                    if (isNaN(contact.contactNormal[0]) || isNaN(eAbsorb) || isNaN(contact.penetration))
+                        throw new Error("No bueno!");
                     other.collisionImpulseX += contact.contactNormal[0] * relativeMass * contact.penetration;
                     other.collisionImpulseY += contact.contactNormal[1] * relativeMass * contact.penetration;
                     other.impulseCount++;
@@ -4895,7 +4905,7 @@ var CircleCollisionMask = (function (_super) {
             var contact = this.contacts[q];
             if (contact.first !== this)
                 continue;
-            context.fillRect(contact.contactPoint[0] - this.gameObject.x - 1, contact.contactPoint[1] - this.gameObject.y - 1, 2, 2);
+            context.fillRect(contact.contactPoint[0] - this.gameObject.x - 1 * zoomScale, contact.contactPoint[1] - this.gameObject.y - 1 * zoomScale, 2 * zoomScale, 2 * zoomScale);
             context.beginPath();
             context.moveTo(contact.contactPoint[0] - this.gameObject.x - contact.contactNormal[0] * contact.penetration / 2, contact.contactPoint[1] - this.gameObject.y - contact.contactNormal[1] * contact.penetration / 2);
             context.lineTo(contact.contactPoint[0] - this.gameObject.x + contact.contactNormal[0] * contact.penetration / 2, contact.contactPoint[1] - this.gameObject.y + contact.contactNormal[1] * contact.penetration / 2);
@@ -5201,7 +5211,9 @@ var SpeedScaleCamera = (function (_super) {
     SpeedScaleCamera.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
         if (this.follow) {
-            this.zoomScaleTo = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+            var zst = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+            if (!isNaN(zst) && zst !== Infinity && zst !== -Infinity)
+                this.zoomScaleTo = zst;
         }
         this.fixedTickTime -= delta;
         while (this.fixedTickTime < 0) {
@@ -5277,6 +5289,10 @@ var BackdropObject = (function (_super) {
         var bounds = this.scene.camera.bounds;
         var maxy = this.mountain.maximumY;
         var descent = engine_1.clamp(bounds.top / maxy, 0, 1);
+        if (isNaN(bounds.left)) {
+            console.error("bounds are NaN!");
+            return;
+        }
         var context = adapter.context;
         var gradient = context.createLinearGradient(bounds.left, bounds.bottom, bounds.left, bounds.top);
         gradient.addColorStop(0, this.SKY_TOP);
@@ -5324,14 +5340,16 @@ var MountainObject = (function (_super) {
         var fromx = -50;
         var tox = 300;
         var offy = [];
-        for (var q = Math.floor(fromx / 10); q < Math.floor(tox / 10); q++) {
+        for (var q = Math.floor(fromx / 10); q < Math.floor(tox / 10) + 1; q++) {
             offy.push(Math.random() * 15);
         }
         this.data = [];
         for (var q = fromx; q < tox; q++) {
             var offh = (q - fromx) / 10;
             var offhBase = Math.floor(offh);
-            var off = offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT + offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT;
+            var off = (offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT) + (offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT);
+            if (isNaN(off))
+                throw new Error("off is NaN. q: " + q + ", offhBase: " + offhBase + ", offy[offhBase]: " + offy[offhBase] + ", offy[offhBase + 1]: " + offy[offhBase + 1]);
             this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
         }
         this.mask = new mountain_collision_mask_1.MountainCollisionMask(this);
@@ -5482,6 +5500,8 @@ var MountainCollisionMask = (function (_super) {
                 var minx = data[0][0];
                 var maxx = data[data.length - 1][0];
                 var _a = [other.gameObject.x + other.offset[0], other.gameObject.y + other.offset[1]], otherxx = _a[0], otheryy = _a[1];
+                if (isNaN(otherxx) || isNaN(otheryy))
+                    throw new Error('Their position is NaN');
                 if (otherxx + other.radius < minx)
                     return null;
                 if (otherxx - other.radius > maxx)
@@ -5568,11 +5588,15 @@ var MountainCollisionMask = (function (_super) {
             var eAbsorb = 1 - relativeMass;
             if (!this.isFixed || !other.isFixed) {
                 if (!this.isFixed) {
+                    if (isNaN(contact.contactNormal[0]) || isNaN(eAbsorb) || isNaN(contact.penetration))
+                        throw new Error("No bueno!");
                     this.collisionImpulseX -= contact.contactNormal[0] * eAbsorb * contact.penetration;
                     this.collisionImpulseY -= contact.contactNormal[1] * eAbsorb * contact.penetration;
                     this.impulseCount++;
                 }
                 if (!other.isFixed) {
+                    if (isNaN(contact.contactNormal[0]) || isNaN(eAbsorb) || isNaN(contact.penetration))
+                        throw new Error("No bueno!");
                     other.collisionImpulseX += contact.contactNormal[0] * relativeMass * contact.penetration;
                     other.collisionImpulseY += contact.contactNormal[1] * relativeMass * contact.penetration;
                     other.impulseCount++;
@@ -5649,6 +5673,7 @@ var engine_1 = __webpack_require__(0);
 var backdrop_1 = __webpack_require__(35);
 var player_1 = __webpack_require__(37);
 var mountain_1 = __webpack_require__(36);
+var boulder_controller_1 = __webpack_require__(42);
 var speed_scale_camera_1 = __webpack_require__(33);
 var StartScene = (function (_super) {
     __extends(StartScene, _super);
@@ -5663,13 +5688,15 @@ var StartScene = (function (_super) {
             return;
         this.initialized = true;
         this.addForceGenerator(new engine_1.GravityForceGenerator(9.8));
-        this.addForceGenerator(new engine_1.DragForceGenerator(.2, 2));
+        this.addForceGenerator(new engine_1.DragForceGenerator(.05, .5));
         var player = new player_1.PlayerObject();
         var mountain = new mountain_1.MountainObject();
+        var boulderController = new boulder_controller_1.BoulderControllerObject(player, mountain);
         var backdrop = new backdrop_1.BackdropObject(mountain);
         this.addObject(backdrop);
         this.addObject(mountain);
         this.addObject(player);
+        this.addObject(boulderController);
         var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
         camera.follow = player;
@@ -5736,6 +5763,150 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var boulder_1 = __webpack_require__(43);
+var BoulderControllerObject = (function (_super) {
+    __extends(BoulderControllerObject, _super);
+    function BoulderControllerObject(player, mountain) {
+        var _this = _super.call(this, 'BoulderController', {
+            shouldRender: false
+        }) || this;
+        _this.player = player;
+        _this.mountain = mountain;
+        _this.PBOULDER_REPEAT = 3;
+        _this.MBOULDER_REPEAT = 1;
+        _this._pBoulderTime = 0;
+        _this._mBoulderTime = -20;
+        _this.boulders = [];
+        return _this;
+    }
+    BoulderControllerObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        while (this._pBoulderTime < 0) {
+            this._pBoulderTime += this.PBOULDER_REPEAT;
+            var xdiff = Math.random() * -10;
+            var ydiff = Math.random() * -50 - 20;
+            var boulder = new boulder_1.BoulderObject({
+                x: this.player.x + xdiff,
+                y: this.player.y + ydiff,
+                hspeed: Math.random() * (-xdiff / 10),
+                vspeed: Math.random() * (-ydiff / 10)
+            });
+            this.scene.addObject(boulder);
+            this.boulders.push(boulder);
+        }
+        while (this._mBoulderTime < 0) {
+            this._mBoulderTime += this.MBOULDER_REPEAT;
+            var xdiff = Math.random() * -20;
+            var ydiff = Math.random() * -60 - 70;
+            var fromq = Math.floor(Math.random() * this.mountain.data.length);
+            var fromqd = this.mountain.data[fromq];
+            if (typeof fromqd[0] !== 'number' || isNaN(fromqd[0]))
+                throw new Error("fromqd[0] is " + fromqd[0]);
+            if (typeof fromqd[1] !== 'number' || isNaN(fromqd[1]))
+                throw new Error("fromqd[1] is " + fromqd[1]);
+            if (typeof xdiff !== 'number' || isNaN(xdiff))
+                throw new Error("xdiff is " + xdiff);
+            if (typeof ydiff !== 'number' || isNaN(ydiff))
+                throw new Error("ydiff is " + ydiff);
+            var boulder = new boulder_1.BoulderObject({
+                x: fromqd[0] + xdiff,
+                y: fromqd[1] + ydiff,
+                hspeed: Math.random() * (-xdiff / 10),
+                vspeed: Math.random() * (-ydiff / 10)
+            });
+            this.scene.addObject(boulder);
+            this.boulders.push(boulder);
+        }
+        var maxy = this.mountain.maximumY;
+        for (var q = 0; q < this.boulders.length; q++) {
+            var boulder = this.boulders[q];
+            if (boulder.y - boulder.radius > maxy + 20) {
+                this.scene.removeObject(boulder);
+                this.boulders.splice(q--, 1);
+            }
+        }
+    };
+    return BoulderControllerObject;
+}(engine_1.GameObject));
+exports.BoulderControllerObject = BoulderControllerObject;
+
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var BoulderObject = (function (_super) {
+    __extends(BoulderObject, _super);
+    function BoulderObject(opts) {
+        var _this = _super.call(this, 'Boulder', opts) || this;
+        _this._radius = 2 + Math.random() * 2;
+        _this.mask = new engine_1.CircleCollisionMask(_this, _this._radius);
+        if (isNaN(opts.x))
+            throw new Error("opts.x is NaN");
+        if (isNaN(opts.y))
+            throw new Error("opts.y is NaN");
+        return _this;
+    }
+    Object.defineProperty(BoulderObject.prototype, "radius", {
+        get: function () {
+            return this._radius;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    BoulderObject.prototype.renderImpl = function (adapter) {
+        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
+            this.renderImplContext2d(adapter);
+        else
+            throw new Error('Not implemented');
+    };
+    BoulderObject.prototype.renderImplContext2d = function (adapter) {
+        var context = adapter.context;
+        context.fillStyle = '#D2691E';
+        context.strokeStyle = '#964B00';
+        context.lineWidth = .5;
+        context.beginPath();
+        context.ellipse(0, 0, this._radius, this._radius, 0, 0, 2 * Math.PI);
+        context.fill();
+        context.stroke();
+    };
+    return BoulderObject;
+}(engine_1.GameObject));
+exports.BoulderObject = BoulderObject;
 
 
 /***/ })
