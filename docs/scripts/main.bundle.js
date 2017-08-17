@@ -63,11 +63,34 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 33);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(__webpack_require__(12));
+__export(__webpack_require__(3));
+__export(__webpack_require__(21));
+__export(__webpack_require__(23));
+__export(__webpack_require__(10));
+__export(__webpack_require__(22));
+__export(__webpack_require__(31));
+__export(__webpack_require__(19));
+__export(__webpack_require__(24));
+__export(__webpack_require__(17));
+__export(__webpack_require__(28));
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -112,29 +135,6 @@ exports.pointDistance = pointDistance;
 //# sourceMappingURL=math.js.map
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(12));
-__export(__webpack_require__(3));
-__export(__webpack_require__(21));
-__export(__webpack_require__(23));
-__export(__webpack_require__(10));
-__export(__webpack_require__(22));
-__export(__webpack_require__(31));
-__export(__webpack_require__(19));
-__export(__webpack_require__(24));
-__export(__webpack_require__(17));
-__export(__webpack_require__(28));
-//# sourceMappingURL=index.js.map
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -157,7 +157,7 @@ exports.ForceGenerator = ForceGenerator;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 var Camera = (function () {
     function Camera(_scene) {
         this._scene = _scene;
@@ -332,7 +332,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var render_1 = __webpack_require__(13);
 var graphics_adapter_1 = __webpack_require__(11);
 var sprite_1 = __webpack_require__(6);
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 var DefaultGraphicsAdapter = (function (_super) {
     __extends(DefaultGraphicsAdapter, _super);
     function DefaultGraphicsAdapter(_context) {
@@ -467,7 +467,7 @@ exports.DefaultGraphicsAdapter = DefaultGraphicsAdapter;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 var default_graphics_adapter_1 = __webpack_require__(4);
 var CollisionMask = (function () {
     function CollisionMask(_gobj) {
@@ -1121,7 +1121,7 @@ exports.standardGamepadAxisNames = [
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 ;
 var GameObject = (function () {
     function GameObject(name, opts) {
@@ -3843,7 +3843,7 @@ function stubFalse() {
 
 module.exports = merge;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36), __webpack_require__(37)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(40), __webpack_require__(41)(module)))
 
 /***/ }),
 /* 15 */
@@ -3862,8 +3862,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
-var start_scene_1 = __webpack_require__(35);
+var engine_1 = __webpack_require__(0);
+var start_scene_1 = __webpack_require__(39);
 var MyGame = (function (_super) {
     __extends(MyGame, _super);
     function MyGame(framesPerSecond) {
@@ -4356,7 +4356,7 @@ var GameScene = (function () {
             var first = this._colliders[q];
             for (var w = q + 1; w < this._colliders.length; w++) {
                 var second = this._colliders[w];
-                first.checkForCollision(second);
+                first.checkForCollisions(second);
             }
         }
         for (var q = 0; q < this._colliders.length; q++) {
@@ -4762,7 +4762,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var collision_mask_1 = __webpack_require__(5);
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 var CircleCollisionMask = (function (_super) {
     __extends(CircleCollisionMask, _super);
     function CircleCollisionMask(gobj, _radius, _offset, mass) {
@@ -4796,7 +4796,7 @@ var CircleCollisionMask = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    CircleCollisionMask.prototype.checkForCollision = function (other) {
+    CircleCollisionMask.prototype.checkForCollisions = function (other) {
         if (this.isCheckingCollisions)
             throw new Error("Already checking collisions!");
         this.isCheckingCollisions = true;
@@ -4820,10 +4820,10 @@ var CircleCollisionMask = (function (_super) {
                 };
                 this.contacts.push(collision);
                 other.contacts.push(collision);
-                return collision;
+                return [collision];
             }
             else {
-                return other.checkForCollision(this);
+                return other.checkForCollisions(this);
             }
         }
         finally {
@@ -4972,7 +4972,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var collision_mask_1 = __webpack_require__(5);
 var force_generator_1 = __webpack_require__(2);
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 var GravityForceGenerator = (function (_super) {
     __extends(GravityForceGenerator, _super);
     function GravityForceGenerator(hgravity, vgravity) {
@@ -5049,7 +5049,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var force_generator_1 = __webpack_require__(2);
-var math_1 = __webpack_require__(0);
+var math_1 = __webpack_require__(1);
 var SpringForceGenerator = (function (_super) {
     __extends(SpringForceGenerator, _super);
     function SpringForceGenerator(other, springConstant, restLength) {
@@ -5131,7 +5131,7 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(30));
-__export(__webpack_require__(0));
+__export(__webpack_require__(1));
 __export(__webpack_require__(32));
 __export(__webpack_require__(13));
 __export(__webpack_require__(6));
@@ -5178,8 +5178,50 @@ exports.Rect = Rect;
 
 "use strict";
 
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
+var engine_1 = __webpack_require__(0);
+var SpeedScaleCamera = (function (_super) {
+    __extends(SpeedScaleCamera, _super);
+    function SpeedScaleCamera(scene) {
+        var _this = _super.call(this, scene) || this;
+        _this.zoomScaleTo = 30;
+        _this.fixedTickTime = 1 / 30;
+        return _this;
+    }
+    SpeedScaleCamera.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        if (this.follow) {
+            this.zoomScaleTo = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+        }
+        this.fixedTickTime -= delta;
+        while (this.fixedTickTime < 0) {
+            this.fixedTickTime += 1 / 30;
+            this.zoomScale = ((this.zoomScale * 9) + (this.zoomScaleTo * 1)) / 10;
+        }
+    };
+    return SpeedScaleCamera;
+}(engine_1.FollowCamera));
+exports.SpeedScaleCamera = SpeedScaleCamera;
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
 var my_game_1 = __webpack_require__(15);
 var game = new my_game_1.MyGame();
 game.start();
@@ -5195,67 +5237,6 @@ gpProvider.bindAbstractButton('left', 'DPadLeft', 'LeftStickLeft');
 gpProvider.bindAbstractButton('right', 'DPadRight', 'LeftStickRight');
 gpProvider.bindAbstractButton('up', 'DPadUp', 'LeftStickUp');
 gpProvider.bindAbstractButton('down', 'DPadDown', 'LeftStickDown');
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
-var merge = __webpack_require__(14);
-exports.SCALE = 30;
-var PlayerObject = (function (_super) {
-    __extends(PlayerObject, _super);
-    function PlayerObject(opts) {
-        var _this = _super.call(this, 'Player', merge({
-            sprite: {
-                src: '/img/player.png',
-                pivot: { x: 32, y: 86 }
-            },
-            imageScale: 1 / exports.SCALE
-        }, opts)) || this;
-        _this.MOVE_FORCE_MAGNITUDE = .5;
-        _this.mask = new engine_1.CircleCollisionMask(_this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
-        return _this;
-    }
-    PlayerObject.prototype.addToScene = function (scene) {
-        _super.prototype.addToScene.call(this, scene);
-        this.game.renderPhysics = true;
-    };
-    PlayerObject.prototype.tick = function (delta) {
-        _super.prototype.tick.call(this, delta);
-        var hdelta = 0, vdelta = 0;
-        if (this.events.isAbstractButtonDown('left'))
-            hdelta -= 1;
-        if (this.events.isAbstractButtonDown('right'))
-            hdelta += 1;
-        if (this.events.isAbstractButtonDown('up'))
-            vdelta -= 1;
-        if (this.events.isAbstractButtonDown('down'))
-            vdelta += 1;
-        var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
-        if (dist > 1) {
-            hdelta /= dist;
-            vdelta /= dist;
-        }
-        this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, vdelta * this.MOVE_FORCE_MAGNITUDE);
-    };
-    return PlayerObject;
-}(engine_1.GameObject));
-exports.PlayerObject = PlayerObject;
 
 
 /***/ }),
@@ -5275,101 +5256,43 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
-var backdrop_1 = __webpack_require__(40);
-var player_1 = __webpack_require__(34);
-var mountain_1 = __webpack_require__(38);
-var speed_scale_camera_1 = __webpack_require__(39);
-var StartScene = (function (_super) {
-    __extends(StartScene, _super);
-    function StartScene() {
-        var _this = _super.call(this) || this;
-        _this.initialized = false;
+var engine_1 = __webpack_require__(0);
+var BackdropObject = (function (_super) {
+    __extends(BackdropObject, _super);
+    function BackdropObject(mountain, opts) {
+        var _this = _super.call(this, 'Backdrop', opts) || this;
+        _this.mountain = mountain;
+        _this.SKY_TOP = '#2d91c2';
+        _this.SKY_BOTTOM = '#1e528e';
+        _this.GROUND = '#AB5A0F';
         return _this;
     }
-    StartScene.prototype.start = function () {
-        _super.prototype.start.call(this);
-        if (this.initialized)
-            return;
-        this.initialized = true;
-        this.addForceGenerator(new engine_1.GravityForceGenerator(9.8));
-        this.addForceGenerator(new engine_1.DragForceGenerator(.2, 2));
-        var player = new player_1.PlayerObject();
-        var mountain = new mountain_1.MountainObject();
-        var backdrop = new backdrop_1.BackdropObject(mountain);
-        this.addObject(backdrop);
-        this.addObject(mountain);
-        this.addObject(player);
-        var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
-        camera.floorCenterPosition = false;
-        camera.follow = player;
-        camera.clearColor = '';
-        camera.maxZoomScale = 400;
-        camera.minZoomScale = 1;
-        camera.zoomScale = player_1.SCALE;
+    BackdropObject.prototype.renderImpl = function (adapter) {
+        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
+            this.renderImplContext2d(adapter);
+        else
+            throw new Error('Not implemented');
     };
-    return StartScene;
-}(engine_1.GameScene));
-exports.StartScene = StartScene;
+    BackdropObject.prototype.renderImplContext2d = function (adapter) {
+        var bounds = this.scene.camera.bounds;
+        var maxy = this.mountain.maximumY;
+        var descent = engine_1.clamp(bounds.top / maxy, 0, 1);
+        var context = adapter.context;
+        var gradient = context.createLinearGradient(bounds.left, bounds.bottom, bounds.left, bounds.top);
+        gradient.addColorStop(0, this.SKY_TOP);
+        gradient.addColorStop(1, this.SKY_BOTTOM);
+        context.fillStyle = gradient;
+        context.fillRect(bounds.left, bounds.bottom, bounds.right - bounds.left, bounds.top - bounds.bottom);
+        context.fillStyle = this.GROUND;
+        context.fillRect(bounds.left, bounds.top - (bounds.top - bounds.bottom) * (.1 + .2 * descent), bounds.right - bounds.left, bounds.top - bounds.bottom);
+    };
+    return BackdropObject;
+}(engine_1.GameObject));
+exports.BackdropObject = BackdropObject;
 
 
 /***/ }),
 /* 36 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports) {
-
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
-/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5385,8 +5308,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
-var mountain_collision_mask_1 = __webpack_require__(41);
+var engine_1 = __webpack_require__(0);
+var mountain_collision_mask_1 = __webpack_require__(38);
 var MountainObject = (function (_super) {
     __extends(MountainObject, _super);
     function MountainObject(opts) {
@@ -5457,7 +5380,7 @@ exports.MountainObject = MountainObject;
 
 
 /***/ }),
-/* 39 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5473,85 +5396,52 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
-var SpeedScaleCamera = (function (_super) {
-    __extends(SpeedScaleCamera, _super);
-    function SpeedScaleCamera(scene) {
-        var _this = _super.call(this, scene) || this;
-        _this.zoomScaleTo = 30;
-        _this.fixedTickTime = 1 / 30;
+var engine_1 = __webpack_require__(0);
+var merge = __webpack_require__(14);
+exports.SCALE = 30;
+var PlayerObject = (function (_super) {
+    __extends(PlayerObject, _super);
+    function PlayerObject(opts) {
+        var _this = _super.call(this, 'Player', merge({
+            sprite: {
+                src: '/img/player.png',
+                pivot: { x: 32, y: 86 }
+            },
+            imageScale: 1 / exports.SCALE
+        }, opts)) || this;
+        _this.MOVE_FORCE_MAGNITUDE = .5;
+        _this.mask = new engine_1.CircleCollisionMask(_this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
         return _this;
     }
-    SpeedScaleCamera.prototype.tick = function (delta) {
+    PlayerObject.prototype.addToScene = function (scene) {
+        _super.prototype.addToScene.call(this, scene);
+        this.game.renderPhysics = true;
+    };
+    PlayerObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
-        if (this.follow) {
-            this.zoomScaleTo = 32 - Math.sqrt(this.follow.speed + 16) / 2;
+        var hdelta = 0, vdelta = 0;
+        if (this.events.isAbstractButtonDown('left'))
+            hdelta -= 1;
+        if (this.events.isAbstractButtonDown('right'))
+            hdelta += 1;
+        if (this.events.isAbstractButtonDown('up'))
+            vdelta -= 1;
+        if (this.events.isAbstractButtonDown('down'))
+            vdelta += 1;
+        var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
+        if (dist > 1) {
+            hdelta /= dist;
+            vdelta /= dist;
         }
-        this.fixedTickTime -= delta;
-        while (this.fixedTickTime < 0) {
-            this.fixedTickTime += 1 / 30;
-            this.zoomScale = ((this.zoomScale * 9) + (this.zoomScaleTo * 1)) / 10;
-        }
+        this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, vdelta * this.MOVE_FORCE_MAGNITUDE);
     };
-    return SpeedScaleCamera;
-}(engine_1.FollowCamera));
-exports.SpeedScaleCamera = SpeedScaleCamera;
-
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
-var BackdropObject = (function (_super) {
-    __extends(BackdropObject, _super);
-    function BackdropObject(mountain, opts) {
-        var _this = _super.call(this, 'Backdrop', opts) || this;
-        _this.mountain = mountain;
-        _this.SKY_TOP = '#2d91c2';
-        _this.SKY_BOTTOM = '#1e528e';
-        _this.GROUND = '#AB5A0F';
-        return _this;
-    }
-    BackdropObject.prototype.renderImpl = function (adapter) {
-        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
-            this.renderImplContext2d(adapter);
-        else
-            throw new Error('Not implemented');
-    };
-    BackdropObject.prototype.renderImplContext2d = function (adapter) {
-        var bounds = this.scene.camera.bounds;
-        var maxy = this.mountain.maximumY;
-        var descent = engine_1.clamp(bounds.top / maxy, 0, 1);
-        var context = adapter.context;
-        var gradient = context.createLinearGradient(bounds.left, bounds.bottom, bounds.left, bounds.top);
-        gradient.addColorStop(0, this.SKY_TOP);
-        gradient.addColorStop(1, this.SKY_BOTTOM);
-        context.fillStyle = gradient;
-        context.fillRect(bounds.left, bounds.bottom, bounds.right - bounds.left, bounds.top - bounds.bottom);
-        context.fillStyle = this.GROUND;
-        context.fillRect(bounds.left, bounds.top - (bounds.top - bounds.bottom) * (.1 + .2 * descent), bounds.right - bounds.left, bounds.top - bounds.bottom);
-    };
-    return BackdropObject;
+    return PlayerObject;
 }(engine_1.GameObject));
-exports.BackdropObject = BackdropObject;
+exports.PlayerObject = PlayerObject;
 
 
 /***/ }),
-/* 41 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5567,17 +5457,22 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(1);
+var engine_1 = __webpack_require__(0);
 var MountainCollisionMask = (function (_super) {
     __extends(MountainCollisionMask, _super);
     function MountainCollisionMask(mountain) {
         var _this = _super.call(this, mountain) || this;
         _this.mountain = mountain;
+        _this.possibleContactPoints = [];
         _this.isCheckingCollisions = false;
         _this.isFixed = true;
         return _this;
     }
-    MountainCollisionMask.prototype.checkForCollision = function (other) {
+    MountainCollisionMask.prototype.clearContacts = function () {
+        _super.prototype.clearContacts.call(this);
+        this.possibleContactPoints.length = 0;
+    };
+    MountainCollisionMask.prototype.checkForCollisions = function (other) {
         if (this.isCheckingCollisions)
             throw new Error("Already checking collisions!");
         this.isCheckingCollisions = true;
@@ -5591,10 +5486,64 @@ var MountainCollisionMask = (function (_super) {
                     return null;
                 if (otherxx - other.radius > maxx)
                     return null;
-                return null;
+                var minCheckX = otherxx - other.radius;
+                var maxCheckX = otherxx + other.radius;
+                var minq = 0, maxq = data.length - 2;
+                minx = data[minq][0];
+                for (var q = 0; q < data.length - 2; q++) {
+                    var dqx = data[q][0];
+                    if (dqx < minCheckX && dqx > minx) {
+                        minq = q;
+                        minx = dqx;
+                    }
+                    else if (dqx > maxCheckX) {
+                        maxq = q;
+                        break;
+                    }
+                }
+                var collisions = [];
+                for (var q = minq; q < maxq; q++) {
+                    var dq1 = data[q];
+                    var dq2 = data[q + 1];
+                    var miny = Math.min(dq1[1], dq2[1]);
+                    var maxy = Math.max(dq1[1], dq2[1]);
+                    if (otheryy + other.radius < miny || otheryy - other.radius > maxy)
+                        continue;
+                    var A1 = dq2[1] - dq1[1];
+                    var B1 = dq1[0] - dq2[0];
+                    var C1 = (dq2[1] - dq1[1]) * dq1[0] + (dq1[0] - dq2[0]) * dq1[1];
+                    var C2 = (-B1 * otherxx) + (A1 * otheryy);
+                    var det = A1 * A1 - -B1 * B1;
+                    var _b = (!!det ? [(A1 * C1 - B1 * C2) / det, (A1 * C2 - -B1 * C1) / det] : [otherxx, otheryy]), cx = _b[0], cy = _b[1];
+                    if (isNaN(det) || isNaN(cx) || isNaN(cy))
+                        continue;
+                    if (cx < dq1[0])
+                        cx = dq1[0], cy = dq1[1];
+                    else if (cx > dq2[0])
+                        cx = dq2[0], cy = dq2[1];
+                    var dist2 = engine_1.pointDistance2(cx, cy, otherxx, otheryy);
+                    var isCollision = dist2 < other.radius * other.radius;
+                    this.possibleContactPoints.push([cx, cy, isCollision]);
+                    if (!isCollision)
+                        continue;
+                    var dist = Math.sqrt(dist2);
+                    var normal = [(otherxx - cx) / dist, (otheryy - cy) / dist];
+                    var penetration = other.radius - dist;
+                    var collision = {
+                        first: this,
+                        second: other,
+                        contactNormal: normal,
+                        contactPoint: [cx, cy],
+                        penetration: penetration + .01
+                    };
+                    this.contacts.push(collision);
+                    other.contacts.push(collision);
+                    collisions.push(collision);
+                }
+                return collisions.length ? collisions : null;
             }
             else {
-                return other.checkForCollision(this);
+                return other.checkForCollisions(this);
             }
         }
         finally {
@@ -5662,10 +5611,131 @@ var MountainCollisionMask = (function (_super) {
             context.lineTo(x, y);
         }
         context.stroke();
+        context.lineWidth *= 2;
+        for (var q = 0; q < this.possibleContactPoints.length; q++) {
+            var _b = this.possibleContactPoints[q], cx = _b[0], cy = _b[1], onSegment = _b[2];
+            context.beginPath();
+            context.strokeStyle = onSegment ? 'green' : 'red';
+            context.moveTo(cx - context.lineWidth * 6, cy - context.lineWidth * 6);
+            context.lineTo(cx + context.lineWidth * 6, cy + context.lineWidth * 6);
+            context.moveTo(cx + context.lineWidth * 6, cy - context.lineWidth * 6);
+            context.lineTo(cx - context.lineWidth * 6, cy + context.lineWidth * 6);
+            context.stroke();
+        }
     };
     return MountainCollisionMask;
 }(engine_1.CollisionMask));
 exports.MountainCollisionMask = MountainCollisionMask;
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var backdrop_1 = __webpack_require__(35);
+var player_1 = __webpack_require__(37);
+var mountain_1 = __webpack_require__(36);
+var speed_scale_camera_1 = __webpack_require__(33);
+var StartScene = (function (_super) {
+    __extends(StartScene, _super);
+    function StartScene() {
+        var _this = _super.call(this) || this;
+        _this.initialized = false;
+        return _this;
+    }
+    StartScene.prototype.start = function () {
+        _super.prototype.start.call(this);
+        if (this.initialized)
+            return;
+        this.initialized = true;
+        this.addForceGenerator(new engine_1.GravityForceGenerator(9.8));
+        this.addForceGenerator(new engine_1.DragForceGenerator(.2, 2));
+        var player = new player_1.PlayerObject();
+        var mountain = new mountain_1.MountainObject();
+        var backdrop = new backdrop_1.BackdropObject(mountain);
+        this.addObject(backdrop);
+        this.addObject(mountain);
+        this.addObject(player);
+        var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
+        camera.floorCenterPosition = false;
+        camera.follow = player;
+        camera.clearColor = '';
+        camera.maxZoomScale = 400;
+        camera.minZoomScale = 1;
+        camera.zoomScale = player_1.SCALE;
+    };
+    return StartScene;
+}(engine_1.GameScene));
+exports.StartScene = StartScene;
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
 
 
 /***/ })

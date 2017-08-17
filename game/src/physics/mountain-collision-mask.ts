@@ -1,4 +1,4 @@
-import { CollisionMask, CircleCollisionMask } from 'engine';
+import { CollisionMask, CircleCollisionMask, pointDistance2, CollisionT } from 'engine';
 import { MountainObject } from '../objects/mountain';
 
 export class MountainCollisionMask extends CollisionMask {
@@ -7,8 +7,15 @@ export class MountainCollisionMask extends CollisionMask {
         this.isFixed = true;
     }
     
+    clearContacts() {
+        super.clearContacts();
+        this.possibleContactPoints.length = 0;
+    }
+    
+    private possibleContactPoints: [number, number, boolean][] = [];
+    
     private isCheckingCollisions = false;
-    checkForCollision(other: CollisionMask) {
+    checkForCollisions(other: CollisionMask): CollisionT[] | null {
         if (this.isCheckingCollisions) throw new Error(`Already checking collisions!`);
         this.isCheckingCollisions = true;
         try {
@@ -20,29 +27,64 @@ export class MountainCollisionMask extends CollisionMask {
                 if (otherxx + other.radius < minx) return null;
                 if (otherxx - other.radius > maxx) return null;
                 
-                return null;
-                // let [x, y] = [this.gameObject.x + this._offset[0], this.gameObject.y + this._offset[1]];
-                // let [otherx, othery] = [other.gameObject.x + other._offset[0], other.gameObject.y + other._offset[1]];
-                // let dist2 = pointDistance2(x, y, otherx, othery);
-                // let threshold = Math.pow(this.radius + other.radius, 2);
-                // if (dist2 <= 0 || dist2 >= threshold) return null;
+                let minCheckX = otherxx - other.radius;
+                let maxCheckX = otherxx + other.radius;
+                let minq = 0, maxq = data.length - 2;
+                minx = data[minq][0];
+                for (let q = 0; q < data.length - 2; q++) {
+                    let dqx = data[q][0];
+                    if (dqx < minCheckX && dqx > minx) {
+                        minq = q;
+                        minx = dqx;
+                    }
+                    else if (dqx > maxCheckX) {
+                        maxq = q;
+                        break;
+                    }
+                }
                 
-                // let dist = Math.sqrt(dist2);
-                // let normal: [number, number] = [(otherx - x) / dist, (othery - y) / dist];
-                // let penetration = (this.radius + other.radius) - dist;
-                // let collision: CollisionT = {
-                //     first: this,
-                //     second: other,
-                //     contactNormal: normal,
-                //     contactPoint: [x + normal[0] * (this.radius - (penetration / 2)), y + normal[1] * (this.radius - (penetration / 2))],
-                //     penetration: penetration + .01
-                // };
-                // this.contacts.push(collision);
-                // other.contacts.push(collision);
-                // return collision;
+                let collisions = [];
+                for (let q = minq; q < maxq; q++) {
+                    let dq1 = data[q];
+                    let dq2 = data[q + 1];
+                    let miny = Math.min(dq1[1], dq2[1]);
+                    let maxy = Math.max(dq1[1], dq2[1]);
+                    if (otheryy + other.radius < miny || otheryy - other.radius > maxy) continue;
+                    
+                    let A1 = dq2[1] - dq1[1];
+                    let B1 = dq1[0] - dq2[0];
+                    let C1 = (dq2[1] - dq1[1]) * dq1[0] + (dq1[0] - dq2[0]) * dq1[1];
+                    let C2 = (-B1 * otherxx) + (A1 * otheryy);
+                    let det = A1*A1 - -B1 * B1;
+                    let [cx, cy] = (!!det ? [(A1*C1 - B1*C2) / det, (A1*C2 - -B1*C1) / det] : [otherxx, otheryy]);
+                    if (isNaN(det) || isNaN(cx) || isNaN(cy)) continue;
+                    if (cx < dq1[0]) [cx, cy] = dq1;
+                    else if (cx > dq2[0]) [cx, cy] = dq2;
+                    let dist2 = pointDistance2(cx, cy, otherxx, otheryy);
+                    let isCollision = dist2 < other.radius * other.radius;
+                    this.possibleContactPoints.push([cx, cy, isCollision]);
+                    if (!isCollision) continue;
+                    let dist = Math.sqrt(dist2);
+                    
+                    let normal: [number, number] = [(otherxx - cx) / dist, (otheryy - cy) / dist];
+                    let penetration = other.radius - dist;
+                    let collision: CollisionT = {
+                        first: this,
+                        second: other,
+                        contactNormal: normal,
+                        // contactPoint: [x + normal[0] * (this.radius - (penetration / 2)), y + normal[1] * (this.radius - (penetration / 2))],
+                        contactPoint: [cx, cy],
+                        penetration: penetration + .01
+                    };
+                    this.contacts.push(collision);
+                    other.contacts.push(collision);
+                    collisions.push(collision);
+                }
+                
+                return collisions.length ? collisions : null;
             }
             else {
-                return other.checkForCollision(this);
+                return other.checkForCollisions(this);
             }
         }
         finally { this.isCheckingCollisions = false; }
@@ -106,5 +148,17 @@ export class MountainCollisionMask extends CollisionMask {
             context.lineTo(x, y);
         }
         context.stroke();
+        
+        context.lineWidth *= 2;
+        for (let q = 0; q < this.possibleContactPoints.length; q++) {
+            let [cx, cy, onSegment] = this.possibleContactPoints[q];
+            context.beginPath();
+            context.strokeStyle = onSegment ? 'green' : 'red';
+            context.moveTo(cx - context.lineWidth * 6, cy - context.lineWidth * 6);
+            context.lineTo(cx + context.lineWidth * 6, cy + context.lineWidth * 6);
+            context.moveTo(cx + context.lineWidth * 6, cy - context.lineWidth * 6);
+            context.lineTo(cx - context.lineWidth * 6, cy + context.lineWidth * 6);
+            context.stroke();
+        }
     }
 }
