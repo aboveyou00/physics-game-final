@@ -5608,8 +5608,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(0);
-var merge = __webpack_require__(14);
 var boulder_1 = __webpack_require__(37);
+var mountain_1 = __webpack_require__(38);
+var merge = __webpack_require__(14);
 exports.SCALE = 30;
 var SquishyPlayerObject = (function (_super) {
     __extends(SquishyPlayerObject, _super);
@@ -5641,6 +5642,37 @@ var SquishyPlayerObject = (function (_super) {
     };
     return SquishyPlayerObject;
 }(engine_1.GameObject));
+var FloorCheckPlayerObject = (function (_super) {
+    __extends(FloorCheckPlayerObject, _super);
+    function FloorCheckPlayerObject(player, opts) {
+        var _this = _super.call(this, 'FloorCheckPlayer', merge({
+            shouldRender: false
+        }, opts)) || this;
+        _this.player = player;
+        _this.mask = new engine_1.CircleCollisionMask(_this, 24 / exports.SCALE, [0, -10 / exports.SCALE]);
+        _this.mask.isFixed = true;
+        _this.mask.isTrigger = true;
+        return _this;
+    }
+    FloorCheckPlayerObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        _a = [this.player.x, this.player.y], this.x = _a[0], this.y = _a[1];
+        if (!this.player.isAlive)
+            return;
+        this.player.isOnFloor = false;
+        var triggers = this.mask.triggers;
+        for (var _i = 0, triggers_2 = triggers; _i < triggers_2.length; _i++) {
+            var trigger = triggers_2[_i];
+            var triggerGobj = trigger.gameObject;
+            if (triggerGobj instanceof boulder_1.BoulderObject || triggerGobj instanceof mountain_1.MountainObject) {
+                this.player.isOnFloor = true;
+                break;
+            }
+        }
+        var _a;
+    };
+    return FloorCheckPlayerObject;
+}(engine_1.GameObject));
 var PlayerObject = (function (_super) {
     __extends(PlayerObject, _super);
     function PlayerObject(opts) {
@@ -5653,6 +5685,7 @@ var PlayerObject = (function (_super) {
         }, opts)) || this;
         _this.MOVE_FORCE_MAGNITUDE = .5;
         _this.isAlive = true;
+        _this.isOnFloor = true;
         _this.mask = new engine_1.CircleCollisionMask(_this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
         return _this;
     }
@@ -5660,25 +5693,25 @@ var PlayerObject = (function (_super) {
         _super.prototype.addToScene.call(this, scene);
         this.game.renderPhysics = true;
         this.scene.addObject(new SquishyPlayerObject(this));
+        this.scene.addObject(new FloorCheckPlayerObject(this));
+    };
+    PlayerObject.prototype.handleEvent = function (e) {
+        if (_super.prototype.handleEvent.call(this, e))
+            return true;
+        if (e.type === 'abstractButtonPressed' && e.name === 'up' && this.isOnFloor) {
+            this.mask.addForce(0, -10);
+        }
+        return false;
     };
     PlayerObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
         if (this.isAlive) {
-            var hdelta = 0, vdelta = 0;
+            var hdelta = 0;
             if (this.events.isAbstractButtonDown('left'))
                 hdelta -= 1;
             if (this.events.isAbstractButtonDown('right'))
                 hdelta += 1;
-            if (this.events.isAbstractButtonDown('up'))
-                vdelta -= 1;
-            if (this.events.isAbstractButtonDown('down'))
-                vdelta += 1;
-            var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
-            if (dist > 1) {
-                hdelta /= dist;
-                vdelta /= dist;
-            }
-            this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, vdelta * this.MOVE_FORCE_MAGNITUDE);
+            this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, 0);
         }
     };
     return PlayerObject;
