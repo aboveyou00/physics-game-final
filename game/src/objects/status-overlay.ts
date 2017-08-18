@@ -8,6 +8,11 @@ export class StatusOverlayObject extends GameObject {
         });
     }
     
+    tick(delta: number) {
+        super.tick(delta);
+        this.bringToFront();
+    }
+    
     renderImpl(adapter: GraphicsAdapter) {
         if (adapter instanceof DefaultGraphicsAdapter) this.renderImplContext2d(adapter);
         else throw new Error('Not implemented');

@@ -1449,6 +1449,12 @@ var GameObject = (function () {
     };
     GameObject.prototype.onSceneEnter = function () { };
     GameObject.prototype.onSceneExit = function () { };
+    GameObject.prototype.bringToFront = function () {
+        this.scene.bringObjectToFront(this);
+    };
+    GameObject.prototype.sendToBack = function () {
+        this.scene.sendObjectToBack(this);
+    };
     GameObject.prototype.handleEvent = function (evt) {
     };
     GameObject.prototype.tick = function (delta) {
@@ -4462,6 +4468,24 @@ var GameScene = (function () {
             throw new Error("Invalid predicate: " + predicate);
         return this._objects.filter(predicate);
     };
+    GameScene.prototype.bringObjectToFront = function (obj) {
+        var idx = this._objects.indexOf(obj);
+        if (idx === -1)
+            throw new Error("Cannot repostion game object that is not a child of the scene.");
+        if (idx === this._objects.length - 1)
+            return;
+        this._objects.splice(idx, 1);
+        this._objects.push(obj);
+    };
+    GameScene.prototype.sendObjectToBack = function (obj) {
+        var idx = this._objects.indexOf(obj);
+        if (idx === -1)
+            throw new Error("Cannot repostion game object that is not a child of the scene.");
+        if (idx === 0)
+            return;
+        this._objects.splice(idx, 1);
+        this._objects.unshift(obj);
+    };
     GameScene.prototype.removeCollider = function (mask) {
         var idx = this._colliders.indexOf(mask);
         if (idx !== -1)
@@ -6002,6 +6026,10 @@ var StatusOverlayObject = (function (_super) {
         _this.player = player;
         return _this;
     }
+    StatusOverlayObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        this.bringToFront();
+    };
     StatusOverlayObject.prototype.renderImpl = function (adapter) {
         if (adapter instanceof engine_1.DefaultGraphicsAdapter)
             this.renderImplContext2d(adapter);
