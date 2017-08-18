@@ -473,8 +473,10 @@ var CollisionMask = (function () {
     function CollisionMask(_gobj) {
         this._gobj = _gobj;
         this._isFixed = false;
+        this._isTrigger = false;
         this._mass = 1;
         this.contacts = [];
+        this.triggers = [];
         this.collisionImpulseX = 0;
         this.collisionImpulseY = 0;
         this.impulseCount = 0;
@@ -503,6 +505,16 @@ var CollisionMask = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(CollisionMask.prototype, "isTrigger", {
+        get: function () {
+            return this._isTrigger;
+        },
+        set: function (val) {
+            this._isTrigger = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(CollisionMask.prototype, "mass", {
         get: function () {
             return this._mass;
@@ -515,6 +527,7 @@ var CollisionMask = (function () {
     });
     CollisionMask.prototype.clearContacts = function () {
         this.contacts.length = 0;
+        this.triggers.length = 0;
     };
     CollisionMask.prototype.resolveImpulses = function () {
         if (this.impulseCount == 0)
@@ -4814,19 +4827,26 @@ var CircleCollisionMask = (function (_super) {
                 var threshold = Math.pow(this.radius + other.radius, 2);
                 if (dist2 <= 0 || dist2 >= threshold)
                     return null;
-                var dist = Math.sqrt(dist2);
-                var normal = [(otherx - x) / dist, (othery - y) / dist];
-                var penetration = (this.radius + other.radius) - dist;
-                var collision = {
-                    first: this,
-                    second: other,
-                    contactNormal: normal,
-                    contactPoint: [x + normal[0] * (this.radius - (penetration / 2)), y + normal[1] * (this.radius - (penetration / 2))],
-                    penetration: penetration + .01
-                };
-                this.contacts.push(collision);
-                other.contacts.push(collision);
-                return [collision];
+                if (this.isTrigger || other.isTrigger) {
+                    other.triggers.push(this);
+                    this.triggers.push(other);
+                    return null;
+                }
+                else {
+                    var dist = Math.sqrt(dist2);
+                    var normal = [(otherx - x) / dist, (othery - y) / dist];
+                    var penetration = (this.radius + other.radius) - dist;
+                    var collision = {
+                        first: this,
+                        second: other,
+                        contactNormal: normal,
+                        contactPoint: [x + normal[0] * (this.radius - (penetration / 2)), y + normal[1] * (this.radius - (penetration / 2))],
+                        penetration: penetration + .01
+                    };
+                    this.contacts.push(collision);
+                    other.contacts.push(collision);
+                    return [collision];
+                }
             }
             else {
                 return other.checkForCollisions(this);
@@ -5334,7 +5354,7 @@ var BoulderControllerObject = (function (_super) {
         }) || this;
         _this.player = player;
         _this.mountain = mountain;
-        _this.PBOULDER_REPEAT = 3;
+        _this.PBOULDER_REPEAT = 5;
         _this.MBOULDER_REPEAT = 1;
         _this._pBoulderTime = 0;
         _this._mBoulderTime = -20;
@@ -5343,10 +5363,11 @@ var BoulderControllerObject = (function (_super) {
     }
     BoulderControllerObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
+        this._pBoulderTime -= delta;
         while (this._pBoulderTime < 0) {
             this._pBoulderTime += this.PBOULDER_REPEAT;
-            var xdiff = Math.random() * -10;
-            var ydiff = Math.random() * -50 - 20;
+            var xdiff = Math.random() * -30;
+            var ydiff = Math.random() * -60 - 30;
             var boulder = new boulder_1.BoulderObject({
                 x: this.player.x + xdiff,
                 y: this.player.y + ydiff,
@@ -5356,6 +5377,7 @@ var BoulderControllerObject = (function (_super) {
             this.scene.addObject(boulder);
             this.boulders.push(boulder);
         }
+        this._mBoulderTime -= delta;
         while (this._mBoulderTime < 0) {
             this._mBoulderTime += this.MBOULDER_REPEAT;
             var xdiff = Math.random() * -20;
@@ -5560,7 +5582,38 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(0);
 var merge = __webpack_require__(14);
+var boulder_1 = __webpack_require__(37);
 exports.SCALE = 30;
+var SquishyPlayerObject = (function (_super) {
+    __extends(SquishyPlayerObject, _super);
+    function SquishyPlayerObject(player, opts) {
+        var _this = _super.call(this, 'SquishyPlayer', merge({
+            shouldRender: false
+        }, opts)) || this;
+        _this.player = player;
+        _this.mask = new engine_1.CircleCollisionMask(_this, 24 / exports.SCALE, [0, -54 / exports.SCALE]);
+        _this.mask.isFixed = true;
+        _this.mask.isTrigger = true;
+        return _this;
+    }
+    SquishyPlayerObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        _a = [this.player.x, this.player.y], this.x = _a[0], this.y = _a[1];
+        if (!this.player.isAlive)
+            return;
+        var triggers = this.mask.triggers;
+        for (var _i = 0, triggers_1 = triggers; _i < triggers_1.length; _i++) {
+            var trigger = triggers_1[_i];
+            var triggerGobj = trigger.gameObject;
+            if (triggerGobj instanceof boulder_1.BoulderObject) {
+                this.player.isAlive = false;
+                break;
+            }
+        }
+        var _a;
+    };
+    return SquishyPlayerObject;
+}(engine_1.GameObject));
 var PlayerObject = (function (_super) {
     __extends(PlayerObject, _super);
     function PlayerObject(opts) {
@@ -5572,30 +5625,34 @@ var PlayerObject = (function (_super) {
             imageScale: 1 / exports.SCALE
         }, opts)) || this;
         _this.MOVE_FORCE_MAGNITUDE = .5;
+        _this.isAlive = true;
         _this.mask = new engine_1.CircleCollisionMask(_this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
         return _this;
     }
     PlayerObject.prototype.addToScene = function (scene) {
         _super.prototype.addToScene.call(this, scene);
         this.game.renderPhysics = true;
+        this.scene.addObject(new SquishyPlayerObject(this));
     };
     PlayerObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
-        var hdelta = 0, vdelta = 0;
-        if (this.events.isAbstractButtonDown('left'))
-            hdelta -= 1;
-        if (this.events.isAbstractButtonDown('right'))
-            hdelta += 1;
-        if (this.events.isAbstractButtonDown('up'))
-            vdelta -= 1;
-        if (this.events.isAbstractButtonDown('down'))
-            vdelta += 1;
-        var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
-        if (dist > 1) {
-            hdelta /= dist;
-            vdelta /= dist;
+        if (this.isAlive) {
+            var hdelta = 0, vdelta = 0;
+            if (this.events.isAbstractButtonDown('left'))
+                hdelta -= 1;
+            if (this.events.isAbstractButtonDown('right'))
+                hdelta += 1;
+            if (this.events.isAbstractButtonDown('up'))
+                vdelta -= 1;
+            if (this.events.isAbstractButtonDown('down'))
+                vdelta += 1;
+            var dist = engine_1.pointDistance(0, 0, hdelta, vdelta);
+            if (dist > 1) {
+                hdelta /= dist;
+                vdelta /= dist;
+            }
+            this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, vdelta * this.MOVE_FORCE_MAGNITUDE);
         }
-        this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, vdelta * this.MOVE_FORCE_MAGNITUDE);
     };
     return PlayerObject;
 }(engine_1.GameObject));
@@ -5690,19 +5747,25 @@ var MountainCollisionMask = (function (_super) {
                     this.possibleContactPoints.push([cx, cy, isCollision]);
                     if (!isCollision)
                         continue;
-                    var dist = Math.sqrt(dist2);
-                    var normal = [(otherxx - cx) / dist, (otheryy - cy) / dist];
-                    var penetration = other.radius - dist;
-                    var collision = {
-                        first: this,
-                        second: other,
-                        contactNormal: normal,
-                        contactPoint: [cx, cy],
-                        penetration: penetration + .01
-                    };
-                    this.contacts.push(collision);
-                    other.contacts.push(collision);
-                    collisions.push(collision);
+                    if (this.isTrigger || other.isTrigger) {
+                        other.triggers.push(this);
+                        this.triggers.push(other);
+                    }
+                    else {
+                        var dist = Math.sqrt(dist2);
+                        var normal = [(otherxx - cx) / dist, (otheryy - cy) / dist];
+                        var penetration = other.radius - dist;
+                        var collision = {
+                            first: this,
+                            second: other,
+                            contactNormal: normal,
+                            contactPoint: [cx, cy],
+                            penetration: penetration + .01
+                        };
+                        this.contacts.push(collision);
+                        other.contacts.push(collision);
+                        collisions.push(collision);
+                    }
                 }
                 return collisions.length ? collisions : null;
             }
@@ -5818,6 +5881,7 @@ var backdrop_1 = __webpack_require__(35);
 var player_1 = __webpack_require__(39);
 var mountain_1 = __webpack_require__(38);
 var boulder_controller_1 = __webpack_require__(36);
+var status_overlay_1 = __webpack_require__(44);
 var speed_scale_camera_1 = __webpack_require__(33);
 var StartScene = (function (_super) {
     __extends(StartScene, _super);
@@ -5837,10 +5901,12 @@ var StartScene = (function (_super) {
         var mountain = new mountain_1.MountainObject();
         var boulderController = new boulder_controller_1.BoulderControllerObject(player, mountain);
         var backdrop = new backdrop_1.BackdropObject(mountain);
+        var statusOverlay = new status_overlay_1.StatusOverlayObject(player);
         this.addObject(backdrop);
         this.addObject(mountain);
         this.addObject(player);
         this.addObject(boulderController);
+        this.addObject(statusOverlay);
         var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
         camera.follow = player;
@@ -5907,6 +5973,57 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var StatusOverlayObject = (function (_super) {
+    __extends(StatusOverlayObject, _super);
+    function StatusOverlayObject(player) {
+        var _this = _super.call(this, 'StatusOverlay', {
+            renderCamera: 'none'
+        }) || this;
+        _this.player = player;
+        return _this;
+    }
+    StatusOverlayObject.prototype.renderImpl = function (adapter) {
+        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
+            this.renderImplContext2d(adapter);
+        else
+            throw new Error('Not implemented');
+    };
+    StatusOverlayObject.prototype.renderImplContext2d = function (adapter) {
+        var context = adapter.context;
+        var _a = this.game.canvasSize, canvasWidth = _a[0], canvasHeight = _a[1];
+        if (!this.player.isAlive) {
+            context.fillStyle = 'rgba(0, 0, 0, .6)';
+            context.fillRect(0, (canvasHeight / 2) - 200, canvasWidth, 400);
+            context.fillStyle = 'white';
+            context.font = '120px Cambria';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText('You Lose!', canvasWidth / 2, canvasHeight / 2);
+        }
+    };
+    return StatusOverlayObject;
+}(engine_1.GameObject));
+exports.StatusOverlayObject = StatusOverlayObject;
 
 
 /***/ })

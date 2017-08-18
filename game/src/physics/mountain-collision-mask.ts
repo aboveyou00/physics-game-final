@@ -65,21 +65,26 @@ export class MountainCollisionMask extends CollisionMask {
                     let isCollision = dist2 < other.radius * other.radius;
                     this.possibleContactPoints.push([cx, cy, isCollision]);
                     if (!isCollision) continue;
-                    let dist = Math.sqrt(dist2);
                     
-                    let normal: [number, number] = [(otherxx - cx) / dist, (otheryy - cy) / dist];
-                    let penetration = other.radius - dist;
-                    let collision: CollisionT = {
-                        first: this,
-                        second: other,
-                        contactNormal: normal,
-                        // contactPoint: [x + normal[0] * (this.radius - (penetration / 2)), y + normal[1] * (this.radius - (penetration / 2))],
-                        contactPoint: [cx, cy],
-                        penetration: penetration + .01
-                    };
-                    this.contacts.push(collision);
-                    other.contacts.push(collision);
-                    collisions.push(collision);
+                    if (this.isTrigger || other.isTrigger) {
+                        other.triggers.push(this);
+                        this.triggers.push(other);
+                    }
+                    else {
+                        let dist = Math.sqrt(dist2);
+                        let normal: [number, number] = [(otherxx - cx) / dist, (otheryy - cy) / dist];
+                        let penetration = other.radius - dist;
+                        let collision: CollisionT = {
+                            first: this,
+                            second: other,
+                            contactNormal: normal,
+                            contactPoint: [cx, cy],
+                            penetration: penetration + .01
+                        };
+                        this.contacts.push(collision);
+                        other.contacts.push(collision);
+                        collisions.push(collision);
+                    }
                 }
                 
                 return collisions.length ? collisions : null;

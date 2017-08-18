@@ -10,7 +10,7 @@ export class BoulderControllerObject extends GameObject {
         });
     }
     
-    private PBOULDER_REPEAT = 3;
+    private PBOULDER_REPEAT = 5;
     private MBOULDER_REPEAT = 1;
     
     private _pBoulderTime = 0;
@@ -21,11 +21,11 @@ export class BoulderControllerObject extends GameObject {
     tick(delta: number) {
         super.tick(delta);
         
-        // this._pBoulderTime -= delta;
+        this._pBoulderTime -= delta;
         while (this._pBoulderTime < 0) {
             this._pBoulderTime += this.PBOULDER_REPEAT;
-            let xdiff = Math.random() * -10;
-            let ydiff = Math.random() * -50 - 20;
+            let xdiff = Math.random() * -30;
+            let ydiff = Math.random() * -60 - 30;
             let boulder = new BoulderObject({
                 x: this.player.x + xdiff,
                 y: this.player.y + ydiff,
@@ -36,7 +36,7 @@ export class BoulderControllerObject extends GameObject {
             this.boulders.push(boulder);
         }
         
-        // this._mBoulderTime -= delta;
+        this._mBoulderTime -= delta;
         while (this._mBoulderTime < 0) {
             this._mBoulderTime += this.MBOULDER_REPEAT;
             let xdiff = Math.random() * -20;

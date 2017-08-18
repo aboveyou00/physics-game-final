@@ -3,6 +3,7 @@ import { BackdropObject } from '../objects/backdrop';
 import { PlayerObject, SCALE } from '../objects/player';
 import { MountainObject } from '../objects/mountain';
 import { BoulderControllerObject } from '../objects/boulder-controller';
+import { StatusOverlayObject } from '../objects/status-overlay';
 import { SpeedScaleCamera } from '../cameras/speed-scale-camera';
 
 export class StartScene extends GameScene {
@@ -25,11 +26,13 @@ export class StartScene extends GameScene {
         let mountain = new MountainObject();
         let boulderController = new BoulderControllerObject(player, mountain);
         let backdrop = new BackdropObject(mountain);
-        
+        let statusOverlay = new StatusOverlayObject(player);
+
         this.addObject(backdrop);
         this.addObject(mountain);
         this.addObject(player);
         this.addObject(boulderController);
+        this.addObject(statusOverlay);
 
         let camera = this.camera = new SpeedScaleCamera(this);
         camera.floorCenterPosition = false;
