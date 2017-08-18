@@ -5542,6 +5542,9 @@ var MountainObject = (function (_super) {
                 throw new Error("off is NaN. q: " + q + ", offhBase: " + offhBase + ", offy[offhBase]: " + offy[offhBase] + ", offy[offhBase + 1]: " + offy[offhBase + 1]);
             this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
         }
+        var lastData = this.data[this.data.length - 1];
+        this.data.push([lastData[0] + 40, lastData[1] + 6]);
+        this.data.push([lastData[0] + 120, lastData[1] + 8]);
         this.mask = new mountain_collision_mask_1.MountainCollisionMask(this);
     };
     Object.defineProperty(MountainObject.prototype, "maximumY", {
