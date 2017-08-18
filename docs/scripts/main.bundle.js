@@ -3849,7 +3849,7 @@ function stubFalse() {
 
 module.exports = merge;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(40), __webpack_require__(41)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42), __webpack_require__(43)(module)))
 
 /***/ }),
 /* 15 */
@@ -3869,7 +3869,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(0);
-var start_scene_1 = __webpack_require__(39);
+var start_scene_1 = __webpack_require__(41);
 var MyGame = (function (_super) {
     __extends(MyGame, _super);
     function MyGame(framesPerSecond) {
@@ -5325,7 +5325,151 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(0);
-var mountain_collision_mask_1 = __webpack_require__(38);
+var boulder_1 = __webpack_require__(37);
+var BoulderControllerObject = (function (_super) {
+    __extends(BoulderControllerObject, _super);
+    function BoulderControllerObject(player, mountain) {
+        var _this = _super.call(this, 'BoulderController', {
+            shouldRender: false
+        }) || this;
+        _this.player = player;
+        _this.mountain = mountain;
+        _this.PBOULDER_REPEAT = 3;
+        _this.MBOULDER_REPEAT = 1;
+        _this._pBoulderTime = 0;
+        _this._mBoulderTime = -20;
+        _this.boulders = [];
+        return _this;
+    }
+    BoulderControllerObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        while (this._pBoulderTime < 0) {
+            this._pBoulderTime += this.PBOULDER_REPEAT;
+            var xdiff = Math.random() * -10;
+            var ydiff = Math.random() * -50 - 20;
+            var boulder = new boulder_1.BoulderObject({
+                x: this.player.x + xdiff,
+                y: this.player.y + ydiff,
+                hspeed: Math.random() * (-xdiff / 10),
+                vspeed: Math.random() * (-ydiff / 10)
+            });
+            this.scene.addObject(boulder);
+            this.boulders.push(boulder);
+        }
+        while (this._mBoulderTime < 0) {
+            this._mBoulderTime += this.MBOULDER_REPEAT;
+            var xdiff = Math.random() * -20;
+            var ydiff = Math.random() * -60 - 70;
+            var fromq = Math.floor(Math.random() * this.mountain.data.length);
+            var fromqd = this.mountain.data[fromq];
+            if (typeof fromqd[0] !== 'number' || isNaN(fromqd[0]))
+                throw new Error("fromqd[0] is " + fromqd[0]);
+            if (typeof fromqd[1] !== 'number' || isNaN(fromqd[1]))
+                throw new Error("fromqd[1] is " + fromqd[1]);
+            if (typeof xdiff !== 'number' || isNaN(xdiff))
+                throw new Error("xdiff is " + xdiff);
+            if (typeof ydiff !== 'number' || isNaN(ydiff))
+                throw new Error("ydiff is " + ydiff);
+            var boulder = new boulder_1.BoulderObject({
+                x: fromqd[0] + xdiff,
+                y: fromqd[1] + ydiff,
+                hspeed: Math.random() * (-xdiff / 10),
+                vspeed: Math.random() * (-ydiff / 10)
+            });
+            this.scene.addObject(boulder);
+            this.boulders.push(boulder);
+        }
+        var maxy = this.mountain.maximumY;
+        for (var q = 0; q < this.boulders.length; q++) {
+            var boulder = this.boulders[q];
+            if (boulder.y - boulder.radius > maxy + 20) {
+                this.scene.removeObject(boulder);
+                this.boulders.splice(q--, 1);
+            }
+        }
+    };
+    return BoulderControllerObject;
+}(engine_1.GameObject));
+exports.BoulderControllerObject = BoulderControllerObject;
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var BoulderObject = (function (_super) {
+    __extends(BoulderObject, _super);
+    function BoulderObject(opts) {
+        var _this = _super.call(this, 'Boulder', opts) || this;
+        _this._radius = 2 + Math.random() * 2;
+        _this.mask = new engine_1.CircleCollisionMask(_this, _this._radius);
+        if (isNaN(opts.x))
+            throw new Error("opts.x is NaN");
+        if (isNaN(opts.y))
+            throw new Error("opts.y is NaN");
+        return _this;
+    }
+    Object.defineProperty(BoulderObject.prototype, "radius", {
+        get: function () {
+            return this._radius;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    BoulderObject.prototype.renderImpl = function (adapter) {
+        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
+            this.renderImplContext2d(adapter);
+        else
+            throw new Error('Not implemented');
+    };
+    BoulderObject.prototype.renderImplContext2d = function (adapter) {
+        var context = adapter.context;
+        context.fillStyle = '#D2691E';
+        context.strokeStyle = '#964B00';
+        context.lineWidth = .5;
+        context.beginPath();
+        context.ellipse(0, 0, this._radius, this._radius, 0, 0, 2 * Math.PI);
+        context.fill();
+        context.stroke();
+    };
+    return BoulderObject;
+}(engine_1.GameObject));
+exports.BoulderObject = BoulderObject;
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var mountain_collision_mask_1 = __webpack_require__(40);
 var MountainObject = (function (_super) {
     __extends(MountainObject, _super);
     function MountainObject(opts) {
@@ -5398,7 +5542,7 @@ exports.MountainObject = MountainObject;
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5459,7 +5603,7 @@ exports.PlayerObject = PlayerObject;
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5508,9 +5652,9 @@ var MountainCollisionMask = (function (_super) {
                     return null;
                 var minCheckX = otherxx - other.radius;
                 var maxCheckX = otherxx + other.radius;
-                var minq = 0, maxq = data.length - 2;
+                var minq = 0, maxq = data.length - 1;
                 minx = data[minq][0];
-                for (var q = 0; q < data.length - 2; q++) {
+                for (var q = 0; q < data.length - 1; q++) {
                     var dqx = data[q][0];
                     if (dqx < minCheckX && dqx > minx) {
                         minq = q;
@@ -5653,7 +5797,7 @@ exports.MountainCollisionMask = MountainCollisionMask;
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5671,9 +5815,9 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = __webpack_require__(0);
 var backdrop_1 = __webpack_require__(35);
-var player_1 = __webpack_require__(37);
-var mountain_1 = __webpack_require__(36);
-var boulder_controller_1 = __webpack_require__(42);
+var player_1 = __webpack_require__(39);
+var mountain_1 = __webpack_require__(38);
+var boulder_controller_1 = __webpack_require__(36);
 var speed_scale_camera_1 = __webpack_require__(33);
 var StartScene = (function (_super) {
     __extends(StartScene, _super);
@@ -5711,7 +5855,7 @@ exports.StartScene = StartScene;
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports) {
 
 var g;
@@ -5738,7 +5882,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -5763,150 +5907,6 @@ module.exports = function(module) {
 	}
 	return module;
 };
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(0);
-var boulder_1 = __webpack_require__(43);
-var BoulderControllerObject = (function (_super) {
-    __extends(BoulderControllerObject, _super);
-    function BoulderControllerObject(player, mountain) {
-        var _this = _super.call(this, 'BoulderController', {
-            shouldRender: false
-        }) || this;
-        _this.player = player;
-        _this.mountain = mountain;
-        _this.PBOULDER_REPEAT = 3;
-        _this.MBOULDER_REPEAT = 1;
-        _this._pBoulderTime = 0;
-        _this._mBoulderTime = -20;
-        _this.boulders = [];
-        return _this;
-    }
-    BoulderControllerObject.prototype.tick = function (delta) {
-        _super.prototype.tick.call(this, delta);
-        while (this._pBoulderTime < 0) {
-            this._pBoulderTime += this.PBOULDER_REPEAT;
-            var xdiff = Math.random() * -10;
-            var ydiff = Math.random() * -50 - 20;
-            var boulder = new boulder_1.BoulderObject({
-                x: this.player.x + xdiff,
-                y: this.player.y + ydiff,
-                hspeed: Math.random() * (-xdiff / 10),
-                vspeed: Math.random() * (-ydiff / 10)
-            });
-            this.scene.addObject(boulder);
-            this.boulders.push(boulder);
-        }
-        while (this._mBoulderTime < 0) {
-            this._mBoulderTime += this.MBOULDER_REPEAT;
-            var xdiff = Math.random() * -20;
-            var ydiff = Math.random() * -60 - 70;
-            var fromq = Math.floor(Math.random() * this.mountain.data.length);
-            var fromqd = this.mountain.data[fromq];
-            if (typeof fromqd[0] !== 'number' || isNaN(fromqd[0]))
-                throw new Error("fromqd[0] is " + fromqd[0]);
-            if (typeof fromqd[1] !== 'number' || isNaN(fromqd[1]))
-                throw new Error("fromqd[1] is " + fromqd[1]);
-            if (typeof xdiff !== 'number' || isNaN(xdiff))
-                throw new Error("xdiff is " + xdiff);
-            if (typeof ydiff !== 'number' || isNaN(ydiff))
-                throw new Error("ydiff is " + ydiff);
-            var boulder = new boulder_1.BoulderObject({
-                x: fromqd[0] + xdiff,
-                y: fromqd[1] + ydiff,
-                hspeed: Math.random() * (-xdiff / 10),
-                vspeed: Math.random() * (-ydiff / 10)
-            });
-            this.scene.addObject(boulder);
-            this.boulders.push(boulder);
-        }
-        var maxy = this.mountain.maximumY;
-        for (var q = 0; q < this.boulders.length; q++) {
-            var boulder = this.boulders[q];
-            if (boulder.y - boulder.radius > maxy + 20) {
-                this.scene.removeObject(boulder);
-                this.boulders.splice(q--, 1);
-            }
-        }
-    };
-    return BoulderControllerObject;
-}(engine_1.GameObject));
-exports.BoulderControllerObject = BoulderControllerObject;
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = __webpack_require__(0);
-var BoulderObject = (function (_super) {
-    __extends(BoulderObject, _super);
-    function BoulderObject(opts) {
-        var _this = _super.call(this, 'Boulder', opts) || this;
-        _this._radius = 2 + Math.random() * 2;
-        _this.mask = new engine_1.CircleCollisionMask(_this, _this._radius);
-        if (isNaN(opts.x))
-            throw new Error("opts.x is NaN");
-        if (isNaN(opts.y))
-            throw new Error("opts.y is NaN");
-        return _this;
-    }
-    Object.defineProperty(BoulderObject.prototype, "radius", {
-        get: function () {
-            return this._radius;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    BoulderObject.prototype.renderImpl = function (adapter) {
-        if (adapter instanceof engine_1.DefaultGraphicsAdapter)
-            this.renderImplContext2d(adapter);
-        else
-            throw new Error('Not implemented');
-    };
-    BoulderObject.prototype.renderImplContext2d = function (adapter) {
-        var context = adapter.context;
-        context.fillStyle = '#D2691E';
-        context.strokeStyle = '#964B00';
-        context.lineWidth = .5;
-        context.beginPath();
-        context.ellipse(0, 0, this._radius, this._radius, 0, 0, 2 * Math.PI);
-        context.fill();
-        context.stroke();
-    };
-    return BoulderObject;
-}(engine_1.GameObject));
-exports.BoulderObject = BoulderObject;
 
 
 /***/ })

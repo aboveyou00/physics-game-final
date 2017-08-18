@@ -30,9 +30,9 @@ export class MountainCollisionMask extends CollisionMask {
                 
                 let minCheckX = otherxx - other.radius;
                 let maxCheckX = otherxx + other.radius;
-                let minq = 0, maxq = data.length - 2;
+                let minq = 0, maxq = data.length - 1;
                 minx = data[minq][0];
-                for (let q = 0; q < data.length - 2; q++) {
+                for (let q = 0; q < data.length - 1; q++) {
                     let dqx = data[q][0];
                     if (dqx < minCheckX && dqx > minx) {
                         minq = q;
