@@ -89,6 +89,11 @@ export class PlayerObject extends GameObject {
         
         if (e.type === 'abstractButtonPressed' && e.name === 'up' && this.isOnFloor) {
             this.mask.addForce(0, -10);
+            return true;
+        }
+        if (e.type === 'keyPressed' && e.code === 'F3') {
+            this.game.renderPhysics = !this.game.renderPhysics;
+            return true;
         }
         
         return false;
