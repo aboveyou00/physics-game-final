@@ -5,10 +5,11 @@ import { MountainObject } from '../objects/mountain';
 import { BoulderControllerObject } from '../objects/boulder-controller';
 import { StatusOverlayObject } from '../objects/status-overlay';
 import { SpeedScaleCamera } from '../cameras/speed-scale-camera';
+import { StackScene } from '../stack-scene';
 
-export class StartScene extends GameScene {
-    constructor() {
-        super();
+export class StartScene extends StackScene {
+    constructor(parentScene: GameScene) {
+        super(parentScene);
     }
 
     private initialized = false;

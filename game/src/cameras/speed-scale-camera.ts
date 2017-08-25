@@ -5,6 +5,9 @@ export class SpeedScaleCamera extends FollowCamera {
         super(scene);
     }
     
+    clampLeft = -Infinity;
+    clampRight = Infinity;
+    
     private zoomScaleTo = 30;
     private fixedTickTime = 1/30;
     tick(delta: number) {
@@ -18,5 +21,6 @@ export class SpeedScaleCamera extends FollowCamera {
             this.fixedTickTime += 1/30;
             this.zoomScale = ((this.zoomScale * 9) + (this.zoomScaleTo * 1)) / 10;
         }
+        
     }
 }

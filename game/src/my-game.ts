@@ -1,5 +1,6 @@
 import { Game } from 'engine';
-import { StartScene } from './scenes/start.scene';
+import { MenuScene } from './gui/menu.scene';
+import { MainMenuObject } from './main-menu/main-menu';
 
 export class MyGame extends Game {
     constructor(framesPerSecond = 30) {
@@ -8,6 +9,7 @@ export class MyGame extends Game {
 
     start() {
         super.start();
-        this.changeScene(new StartScene());
+        let menu = new MainMenuObject();
+        this.changeScene(new MenuScene(menu, null));
     }
 }
