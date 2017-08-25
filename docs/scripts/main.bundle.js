@@ -4491,6 +4491,8 @@ var FollowCamera = (function (_super) {
         var _this = _super.call(this, scene) || this;
         _this._follow = null;
         _this._offset = [0, 0];
+        _this.clampLeft = -Infinity;
+        _this.clampRight = Infinity;
         return _this;
     }
     Object.defineProperty(FollowCamera.prototype, "follow", {
@@ -4519,6 +4521,11 @@ var FollowCamera = (function (_super) {
             var target = [this._follow.x + this._offset[0], this._follow.y + this._offset[1]];
             this.center = target;
         }
+        var bounds = this.bounds;
+        if (bounds.right > this.clampRight)
+            this.center = [this.center[0] - (bounds.right - this.clampRight), this.center[1]];
+        if (bounds.left < this.clampLeft)
+            this.center = [this.center[0] + (this.clampLeft - bounds.left), this.center[1]];
         _super.prototype.renderTransformed.call(this, adapter, act);
     };
     return FollowCamera;
@@ -5524,8 +5531,6 @@ var SpeedScaleCamera = (function (_super) {
     __extends(SpeedScaleCamera, _super);
     function SpeedScaleCamera(scene) {
         var _this = _super.call(this, scene) || this;
-        _this.clampLeft = -Infinity;
-        _this.clampRight = Infinity;
         _this.zoomScaleTo = 30;
         _this.fixedTickTime = 1 / 30;
         return _this;
@@ -6186,6 +6191,8 @@ var StartScene = (function (_super) {
             console.log(levelMeta);
         }
         var camera = this.camera = new speed_scale_camera_1.SpeedScaleCamera(this);
+        camera.clampLeft = mountain.data[0][0];
+        camera.clampRight = mountain.data[mountain.data.length - 1][0];
         camera.floorCenterPosition = false;
         camera.follow = player;
         camera.clearColor = '';

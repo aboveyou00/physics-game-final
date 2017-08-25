@@ -74,6 +74,8 @@ export class StartScene extends StackScene {
         }
 
         let camera = this.camera = new SpeedScaleCamera(this);
+        camera.clampLeft = mountain.data[0][0];
+        camera.clampRight = mountain.data[mountain.data.length - 1][0];
         camera.floorCenterPosition = false;
         camera.follow = player;
         camera.clearColor = '';
