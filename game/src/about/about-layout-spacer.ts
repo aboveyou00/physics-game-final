@@ -1,4 +1,4 @@
-import { GameScene, GameObject, GraphicsAdapter, DefaultGraphicsAdapter } from 'engine';
+import { GameScene, GameObject, GraphicsAdapter, DefaultGraphicsAdapter, fillText } from 'engine';
 import { credits } from '../dbs/credits.db';
 import { StackScene } from '../stack-scene';
 
@@ -28,15 +28,15 @@ export class AboutLayoutSpacer extends GameObject {
             case 'text':
                 context.textBaseline = 'top';
                 context.textAlign = 'center';
-                context.font = `${item.isBold ? 'bold ' : ''}${item.fontSize || 24} ${item.fontFamily || 'Cambria'}`;
+                context.font = `${item.isBold ? 'bold ' : ''}${item.fontSize || 24}px ${item.fontFamily || 'Cambria'}`;
                 context.fillStyle = 'white';
-                context.fillText(item.text, xx, yy);
-                yy += Math.floor((item.fontSize || 24) * 1.4);
+                fillText(context, item.text, xx, yy);
+                yy += Math.floor((item.fontSize || 24) * 1.4) * (item.text.split('\n').length) + (item.marginBottom || 0);
                 break;
             case 'image':
                 let image = this.resources.loadImage(item.sprite.src);
                 context.drawImage(image, xx - (image.width / 2), yy);
-                yy += image.height;
+                yy += image.height + (item.marginBottom || 0);
                 break;
             }
         }
