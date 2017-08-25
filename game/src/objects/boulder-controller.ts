@@ -4,14 +4,11 @@ import { MountainObject } from './mountain';
 import { BoulderObject } from './boulder';
 
 export class BoulderControllerObject extends GameObject {
-    constructor(private player: PlayerObject, private mountain: MountainObject) {
+    constructor(private player: PlayerObject, private mountain: MountainObject, readonly playerBoulderRepeat = 5, readonly mountainBoulderRepeat = 1) {
         super('BoulderController', {
             shouldRender: false
         });
     }
-    
-    private PBOULDER_REPEAT = 5;
-    private MBOULDER_REPEAT = 1;
     
     private _pBoulderTime = 0;
     private _mBoulderTime = -20;
@@ -23,7 +20,7 @@ export class BoulderControllerObject extends GameObject {
         
         this._pBoulderTime -= delta;
         while (this._pBoulderTime < 0) {
-            this._pBoulderTime += this.PBOULDER_REPEAT;
+            this._pBoulderTime += this.playerBoulderRepeat;
             let xdiff = Math.random() * -30;
             let ydiff = Math.random() * -60 - 30;
             let boulder = new BoulderObject({
@@ -38,7 +35,7 @@ export class BoulderControllerObject extends GameObject {
         
         this._mBoulderTime -= delta;
         while (this._mBoulderTime < 0) {
-            this._mBoulderTime += this.MBOULDER_REPEAT;
+            this._mBoulderTime += this.mountainBoulderRepeat;
             let xdiff = Math.random() * -20;
             let ydiff = Math.random() * -60 - 70;
             let fromq = Math.floor(Math.random() * this.mountain.data.length);
