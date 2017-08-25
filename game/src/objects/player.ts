@@ -79,7 +79,6 @@ export class PlayerObject extends GameObject {
 
     addToScene(scene: GameScene) {
         super.addToScene(scene);
-        this.game.renderPhysics = true;
         this.scene.addObject(new SquishyPlayerObject(this));
         this.scene.addObject(new FloorCheckPlayerObject(this));
     }

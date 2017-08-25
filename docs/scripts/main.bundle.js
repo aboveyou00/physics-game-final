@@ -5809,7 +5809,6 @@ var PlayerObject = (function (_super) {
     }
     PlayerObject.prototype.addToScene = function (scene) {
         _super.prototype.addToScene.call(this, scene);
-        this.game.renderPhysics = true;
         this.scene.addObject(new SquishyPlayerObject(this));
         this.scene.addObject(new FloorCheckPlayerObject(this));
     };
