@@ -12,6 +12,8 @@ kbProvider.bindAbstractButton('right', 'ArrowRight', 'KeyD');
 kbProvider.bindAbstractButton('up', 'ArrowUp', 'KeyW');
 kbProvider.bindAbstractButton('down', 'ArrowDown', 'KeyS');
 
+kbProvider.bindAbstractButton('jump', 'ArrowUp', 'KeyW', 'Space');
+
 kbProvider.bindAbstractButton('select', 'Enter', 'Space');
 kbProvider.bindAbstractButton('return', 'Escape');
 
@@ -22,6 +24,8 @@ gpProvider.bindAbstractButton('left', 'DPadLeft', 'LeftStickLeft');
 gpProvider.bindAbstractButton('right', 'DPadRight', 'LeftStickRight');
 gpProvider.bindAbstractButton('up', 'DPadUp', 'LeftStickUp');
 gpProvider.bindAbstractButton('down', 'DPadDown', 'LeftStickDown');
+
+gpProvider.bindAbstractButton('space', 'DPadUp', 'LeftStickUp', 'A');
 
 gpProvider.bindAbstractButton('select', 'A');
 gpProvider.bindAbstractButton('return', 'B');

@@ -86,7 +86,7 @@ export class PlayerObject extends GameObject {
     handleEvent(e: GameEvent) {
         if (super.handleEvent(e)) return true;
         
-        if (e.type === 'abstractButtonPressed' && e.name === 'up' && this.isOnFloor) {
+        if (e.type === 'abstractButtonPressed' && e.name === 'jump' && this.isOnFloor) {
             this.mask.addForce(0, -10);
             return true;
         }
@@ -105,8 +105,10 @@ export class PlayerObject extends GameObject {
             let hdelta = 0;
             if (this.events.isAbstractButtonDown('left')) hdelta -= 1;
             if (this.events.isAbstractButtonDown('right')) hdelta += 1;
+            if (!this.isOnFloor) hdelta *= .2;
 
-            this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, 0);
+            let hforce = hdelta * this.MOVE_FORCE_MAGNITUDE;
+            this.mask.addForce(hforce, this.isOnFloor ? Math.abs(hforce) : 0);
         }
     }
 }

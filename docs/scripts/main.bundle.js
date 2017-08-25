@@ -4267,9 +4267,9 @@ var GamepadAbstractButtonProvider = (function () {
         }
         for (var _a = 0, buttons_1 = buttons; _a < buttons_1.length; _a++) {
             var button = buttons_1[_a];
-            if (this._buttons.has(button))
-                throw new Error("The gamepad button '" + button + "' is already registered to the '" + this._buttons.get(button) + "' abstract button.");
-            this._buttons.set(button, name);
+            if (!this._buttons.has(button))
+                this._buttons.set(button, []);
+            this._buttons.get(button).push(name);
             if (!this.queue.abstractButtons.has(name))
                 this.queue.abstractButtons.set(name, false);
             var previous = this.queue.abstractButtons.get(name);
@@ -4290,9 +4290,15 @@ var GamepadAbstractButtonProvider = (function () {
         }
         for (var _a = 0, buttons_2 = buttons; _a < buttons_2.length; _a++) {
             var button = buttons_2[_a];
-            if (!this._buttons.has(button) || this._buttons.get(button) !== name)
+            if (!this._buttons.has(button))
                 throw new Error("The gamepad button '" + button + "' is not registered to the '" + name + "' abstract button.");
-            this._buttons.delete(button);
+            var abstractButtons = this._buttons.get(button);
+            var abidx = abstractButtons.indexOf(name);
+            if (abidx === -1)
+                throw new Error("The gamepad button '" + button + "' is not registered to the '" + name + "' abstract button.");
+            abstractButtons.splice(abidx);
+            if (abstractButtons.length === 0)
+                this._buttons.delete(button);
             var previous = this.queue.abstractButtons.get(name);
             var current = this.queue.isAbstractButtonDown(name, true);
             if (previous && !current) {
@@ -4307,27 +4313,33 @@ var GamepadAbstractButtonProvider = (function () {
     GamepadAbstractButtonProvider.prototype.transformEvent = function (e) {
         if (e.type === 'gamepadButtonPressed') {
             if (this._buttons.has(e.button)) {
-                var abName = this._buttons.get(e.button);
-                if (!this.queue.isAbstractButtonDown(abName)) {
-                    this.queue.abstractButtons.set(abName, true);
-                    this.queue.enqueue({
-                        type: 'abstractButtonPressed',
-                        name: abName,
-                        wrappedEvent: e
-                    });
+                var abNames = this._buttons.get(e.button);
+                for (var _i = 0, abNames_1 = abNames; _i < abNames_1.length; _i++) {
+                    var abName = abNames_1[_i];
+                    if (!this.queue.isAbstractButtonDown(abName)) {
+                        this.queue.abstractButtons.set(abName, true);
+                        this.queue.enqueue({
+                            type: 'abstractButtonPressed',
+                            name: abName,
+                            wrappedEvent: e
+                        });
+                    }
                 }
             }
         }
         else if (e.type === 'gamepadButtonReleased') {
             if (this._buttons.has(e.button)) {
-                var abName = this._buttons.get(e.button);
-                if (this.queue.isAbstractButtonDown(abName) && !this.queue.isAbstractButtonDown(abName, true)) {
-                    this.queue.abstractButtons.set(abName, false);
-                    this.queue.enqueue({
-                        type: 'abstractButtonReleased',
-                        name: abName,
-                        wrappedEvent: e
-                    });
+                var abNames = this._buttons.get(e.button);
+                for (var _a = 0, abNames_2 = abNames; _a < abNames_2.length; _a++) {
+                    var abName = abNames_2[_a];
+                    if (this.queue.isAbstractButtonDown(abName) && !this.queue.isAbstractButtonDown(abName, true)) {
+                        this.queue.abstractButtons.set(abName, false);
+                        this.queue.enqueue({
+                            type: 'abstractButtonReleased',
+                            name: abName,
+                            wrappedEvent: e
+                        });
+                    }
                 }
             }
         }
@@ -4337,7 +4349,8 @@ var GamepadAbstractButtonProvider = (function () {
     GamepadAbstractButtonProvider.prototype.isAbstractButtonDown = function (name) {
         for (var _i = 0, _a = this._buttons.keys(); _i < _a.length; _i++) {
             var button = _a[_i];
-            if (this._buttons.get(button) === name) {
+            var abstractButtons = this._buttons.get(button);
+            if (abstractButtons.indexOf(name) !== -1) {
                 if (this.queue.isGamepadButtonDown(button))
                     return true;
             }
@@ -4385,9 +4398,9 @@ var KeyboardAbstractButtonProvider = (function () {
         }
         for (var _a = 0, keys_1 = keys; _a < keys_1.length; _a++) {
             var key = keys_1[_a];
-            if (this._keys.has(key))
-                throw new Error("The key '" + key + "' is already registered to the '" + this._keys.get(key) + "' abstract button.");
-            this._keys.set(key, name);
+            if (!this._keys.has(key))
+                this._keys.set(key, []);
+            this._keys.get(key).push(name);
             if (!this.queue.abstractButtons.has(name))
                 this.queue.abstractButtons.set(name, false);
             var previous = this.queue.abstractButtons.get(name);
@@ -4408,9 +4421,15 @@ var KeyboardAbstractButtonProvider = (function () {
         }
         for (var _a = 0, keys_2 = keys; _a < keys_2.length; _a++) {
             var key = keys_2[_a];
-            if (!this._keys.has(key) || this._keys.get(key) !== name)
+            if (!this._keys.has(key))
                 throw new Error("The key '" + key + "' is not registered to the '" + name + "' abstract button.");
-            this._keys.delete(key);
+            var abstractButtons = this._keys.get(key);
+            var abidx = abstractButtons.indexOf(name);
+            if (abidx === -1)
+                throw new Error("The key '" + key + "' is not registered to the '" + name + "' abstract button.");
+            abstractButtons.splice(abidx);
+            if (abstractButtons.length === 0)
+                this._keys.delete(key);
             var previous = this.queue.abstractButtons.get(name);
             var current = this.queue.isAbstractButtonDown(name, true);
             if (previous && !current) {
@@ -4425,27 +4444,33 @@ var KeyboardAbstractButtonProvider = (function () {
     KeyboardAbstractButtonProvider.prototype.transformEvent = function (e) {
         if (e.type === 'keyPressed') {
             if (this._keys.has(e.code)) {
-                var abName = this._keys.get(e.code);
-                if (!this.queue.isAbstractButtonDown(abName)) {
-                    this.queue.abstractButtons.set(abName, true);
-                    this.queue.enqueue({
-                        type: 'abstractButtonPressed',
-                        name: abName,
-                        wrappedEvent: e
-                    });
+                var abNames = this._keys.get(e.code);
+                for (var _i = 0, abNames_1 = abNames; _i < abNames_1.length; _i++) {
+                    var abName = abNames_1[_i];
+                    if (!this.queue.isAbstractButtonDown(abName)) {
+                        this.queue.abstractButtons.set(abName, true);
+                        this.queue.enqueue({
+                            type: 'abstractButtonPressed',
+                            name: abName,
+                            wrappedEvent: e
+                        });
+                    }
                 }
             }
         }
         else if (e.type === 'keyReleased') {
             if (this._keys.has(e.code)) {
-                var abName = this._keys.get(e.code);
-                if (this.queue.isAbstractButtonDown(abName) && !this.queue.isAbstractButtonDown(abName, true)) {
-                    this.queue.abstractButtons.set(abName, false);
-                    this.queue.enqueue({
-                        type: 'abstractButtonReleased',
-                        name: abName,
-                        wrappedEvent: e
-                    });
+                var abNames = this._keys.get(e.code);
+                for (var _a = 0, abNames_2 = abNames; _a < abNames_2.length; _a++) {
+                    var abName = abNames_2[_a];
+                    if (this.queue.isAbstractButtonDown(abName) && !this.queue.isAbstractButtonDown(abName, true)) {
+                        this.queue.abstractButtons.set(abName, false);
+                        this.queue.enqueue({
+                            type: 'abstractButtonReleased',
+                            name: abName,
+                            wrappedEvent: e
+                        });
+                    }
                 }
             }
         }
@@ -4455,7 +4480,8 @@ var KeyboardAbstractButtonProvider = (function () {
     KeyboardAbstractButtonProvider.prototype.isAbstractButtonDown = function (name) {
         for (var _i = 0, _a = this._keys.keys(); _i < _a.length; _i++) {
             var key = _a[_i];
-            if (this._keys.get(key) === name) {
+            var abstractButtons = this._keys.get(key);
+            if (abstractButtons.indexOf(name) !== -1) {
                 if (this.queue.isKeyDown(key))
                     return true;
             }
@@ -5570,6 +5596,7 @@ kbProvider.bindAbstractButton('left', 'ArrowLeft', 'KeyA');
 kbProvider.bindAbstractButton('right', 'ArrowRight', 'KeyD');
 kbProvider.bindAbstractButton('up', 'ArrowUp', 'KeyW');
 kbProvider.bindAbstractButton('down', 'ArrowDown', 'KeyS');
+kbProvider.bindAbstractButton('jump', 'ArrowUp', 'KeyW', 'Space');
 kbProvider.bindAbstractButton('select', 'Enter', 'Space');
 kbProvider.bindAbstractButton('return', 'Escape');
 var gpProvider = new engine_1.GamepadAbstractButtonProvider(game.eventQueue);
@@ -5578,6 +5605,7 @@ gpProvider.bindAbstractButton('left', 'DPadLeft', 'LeftStickLeft');
 gpProvider.bindAbstractButton('right', 'DPadRight', 'LeftStickRight');
 gpProvider.bindAbstractButton('up', 'DPadUp', 'LeftStickUp');
 gpProvider.bindAbstractButton('down', 'DPadDown', 'LeftStickDown');
+gpProvider.bindAbstractButton('space', 'DPadUp', 'LeftStickUp', 'A');
 gpProvider.bindAbstractButton('select', 'A');
 gpProvider.bindAbstractButton('return', 'B');
 
@@ -5835,7 +5863,7 @@ var PlayerObject = (function (_super) {
     PlayerObject.prototype.handleEvent = function (e) {
         if (_super.prototype.handleEvent.call(this, e))
             return true;
-        if (e.type === 'abstractButtonPressed' && e.name === 'up' && this.isOnFloor) {
+        if (e.type === 'abstractButtonPressed' && e.name === 'jump' && this.isOnFloor) {
             this.mask.addForce(0, -10);
             return true;
         }
@@ -5853,7 +5881,10 @@ var PlayerObject = (function (_super) {
                 hdelta -= 1;
             if (this.events.isAbstractButtonDown('right'))
                 hdelta += 1;
-            this.mask.addForce(hdelta * this.MOVE_FORCE_MAGNITUDE, 0);
+            if (!this.isOnFloor)
+                hdelta *= .2;
+            var hforce = hdelta * this.MOVE_FORCE_MAGNITUDE;
+            this.mask.addForce(hforce, this.isOnFloor ? Math.abs(hforce) : 0);
         }
     };
     return PlayerObject;
