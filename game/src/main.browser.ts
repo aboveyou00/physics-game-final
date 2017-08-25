@@ -13,6 +13,7 @@ kbProvider.bindAbstractButton('up', 'ArrowUp', 'KeyW');
 kbProvider.bindAbstractButton('down', 'ArrowDown', 'KeyS');
 
 kbProvider.bindAbstractButton('select', 'Enter', 'Space');
+kbProvider.bindAbstractButton('return', 'Escape');
 
 let gpProvider = new GamepadAbstractButtonProvider(game.eventQueue);
 game.eventQueue.addAbstractButtonProvider(gpProvider);
@@ -23,3 +24,4 @@ gpProvider.bindAbstractButton('up', 'DPadUp', 'LeftStickUp');
 gpProvider.bindAbstractButton('down', 'DPadDown', 'LeftStickDown');
 
 gpProvider.bindAbstractButton('select', 'A');
+gpProvider.bindAbstractButton('return', 'B');

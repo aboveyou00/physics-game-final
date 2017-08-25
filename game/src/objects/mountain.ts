@@ -11,23 +11,35 @@ export class MountainObject extends GameObject {
     private RISING_EDGE_WEIGHT = Math.random() * 1.2;
     private FALLING_EDGE_WEIGHT = Math.random() * 1.2;
     private BUMPINESS = .4 + Math.random() * .8;
+    private SMALL_BUMP_MAGNITUDE = 10 + Math.random() * 10;
+    private SMALL_BUMP_SIZE = 6 + Math.round(Math.random() * 8);
+    private LARGE_BUMP_MAGNITUDE = 25 + Math.random() * 50;
+    private LARGE_BUMP_SIZE = 30 + Math.round(Math.random() * 20);
     
     data: [number, number][];
     private init() {
         if (!this.data) {
             let fromx = -50;
-            let tox = 300;
-            let offy = [];
-            for (let q = Math.floor(fromx / 10); q < Math.floor(tox / 10) + 1; q++) {
-                offy.push(Math.random() * 15);
+            let tox = 300 + Math.floor(Math.random() * 600);
+            let smallOffy = [];
+            for (let q = Math.floor(fromx / this.SMALL_BUMP_SIZE); q < Math.floor(tox / this.SMALL_BUMP_SIZE) + 2; q++) {
+                smallOffy.push(Math.random() * this.SMALL_BUMP_MAGNITUDE);
+            }
+            let largeOffy = [];
+            for (let q = Math.floor(fromx / this.LARGE_BUMP_SIZE); q < Math.floor(tox / this.LARGE_BUMP_SIZE) + 2; q++) {
+                largeOffy.push(Math.random() * this.LARGE_BUMP_MAGNITUDE);
             }
             this.data = [];
             for (let q = fromx; q < tox; q++) {
-                let offh = (q - fromx) / 10;
-                let offhBase = Math.floor(offh);
-                let off = (offy[offhBase] * (1 - (offh - offhBase)) * this.FALLING_EDGE_WEIGHT) + (offy[offhBase + 1] * (offh - offhBase) * this.RISING_EDGE_WEIGHT);
-                if (isNaN(off)) throw new Error(`off is NaN. q: ${q}, offhBase: ${offhBase}, offy[offhBase]: ${offy[offhBase]}, offy[offhBase + 1]: ${offy[offhBase + 1]}`);
-                this.data.push([q * 2, q + Math.random() * this.BUMPINESS + off]);
+                let smallOffh = (q - fromx) / this.SMALL_BUMP_SIZE;
+                let smallOffhBase = Math.floor(smallOffh);
+                let largeOffh = (q - fromx) / this.LARGE_BUMP_SIZE;
+                let largeOffhBase = Math.floor(largeOffh);
+                let smallOff = (smallOffy[smallOffhBase] * (1 - (smallOffh - smallOffhBase)) * this.FALLING_EDGE_WEIGHT) + (smallOffy[smallOffhBase + 1] * (smallOffh - smallOffhBase) * this.RISING_EDGE_WEIGHT);
+                if (isNaN(smallOff)) throw new Error(`smallOff is NaN. q: ${q}, smallOffhBase: ${smallOffhBase}, smallOffy[smallOffhBase]: ${smallOffy[smallOffhBase]}, smallOffy[smallOffhBase + 1]: ${smallOffy[smallOffhBase + 1]}`);
+                let largeOff = (largeOffy[largeOffhBase] * (1 - (largeOffh - largeOffhBase)) * this.FALLING_EDGE_WEIGHT) + (largeOffy[largeOffhBase + 1] * (largeOffh - largeOffhBase) * this.RISING_EDGE_WEIGHT);
+                if (isNaN(largeOff)) throw new Error(`largeOff is NaN. q: ${q}, largeOffhBase: ${largeOffhBase}, largeOffy[smallOffhBase]: ${smallOffy[smallOffhBase]}, largeOffy[smallOffhBase + 1]: ${smallOffy[smallOffhBase + 1]}`);
+                this.data.push([q * 2, q + Math.random() * this.BUMPINESS + smallOff + largeOff]);
             }
         }
         let lastData = this.data[this.data.length - 1];
