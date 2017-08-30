@@ -37,7 +37,7 @@ class FloorCheckPlayerObject extends GameObject {
         super('FloorCheckPlayer', merge({
             shouldRender: false
         }, opts));
-        this.mask = new CircleCollisionMask(this, 24 / SCALE, [0, -10 / SCALE]);
+        this.mask = new CircleCollisionMask(this, 32 / SCALE, [0, -10 / SCALE]);
         this.mask.isFixed = true;
         this.mask.isTrigger = true;
     }
@@ -56,6 +56,10 @@ class FloorCheckPlayerObject extends GameObject {
                 this.player.isOnFloor = true;
                 break;
             }
+        }
+        
+        if (this.x + 2 > (<any>this.scene.camera).clampRight) {
+            this.game.changeScene((<any>this.scene).parentScene);
         }
     }
 }
@@ -108,7 +112,7 @@ export class PlayerObject extends GameObject {
             if (!this.isOnFloor) hdelta *= .2;
 
             let hforce = hdelta * this.MOVE_FORCE_MAGNITUDE;
-            this.mask.addForce(hforce, this.isOnFloor ? Math.abs(hforce) : 0);
+            this.mask.addForce(hforce, this.isOnFloor ? Math.abs(hforce) * .2 : 0);
         }
     }
 }
