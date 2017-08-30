@@ -57,10 +57,6 @@ class FloorCheckPlayerObject extends GameObject {
                 break;
             }
         }
-        
-        if (this.x + 2 > (<any>this.scene.camera).clampRight) {
-            this.game.changeScene((<any>this.scene).parentScene);
-        }
     }
 }
 
@@ -73,7 +69,6 @@ export class PlayerObject extends GameObject {
             },
             imageScale: 1 / SCALE
         }, opts));
-        this.mask = new CircleCollisionMask(this, 32 / SCALE, [0, -32 / SCALE]);
     }
 
     private MOVE_FORCE_MAGNITUDE = .5;
@@ -85,6 +80,14 @@ export class PlayerObject extends GameObject {
         super.addToScene(scene);
         this.scene.addObject(new SquishyPlayerObject(this));
         this.scene.addObject(new FloorCheckPlayerObject(this));
+    }
+    
+    init() {
+        this.mask = new CircleCollisionMask(this, 32 / SCALE, [0, -32 / SCALE]);
+        this.shouldRender = true;
+        this.shouldTick = true;
+        this.isAlive = true;
+        this.isOnFloor = false;
     }
     
     handleEvent(e: GameEvent) {
@@ -113,6 +116,10 @@ export class PlayerObject extends GameObject {
 
             let hforce = hdelta * this.MOVE_FORCE_MAGNITUDE;
             this.mask.addForce(hforce, this.isOnFloor ? Math.abs(hforce) * .2 : 0);
+            
+            if (this.x - 2 > (<any>this.scene.camera).clampRight) {
+                this.scene.removeObject(this);
+            }
         }
     }
 }

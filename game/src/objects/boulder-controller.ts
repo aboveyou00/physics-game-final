@@ -18,19 +18,21 @@ export class BoulderControllerObject extends GameObject {
     tick(delta: number) {
         super.tick(delta);
         
-        this._pBoulderTime -= delta;
-        while (this._pBoulderTime < 0) {
-            this._pBoulderTime += this.playerBoulderRepeat;
-            let xdiff = Math.random() * -30;
-            let ydiff = Math.random() * -60 - 30;
-            let boulder = new BoulderObject({
-                x: this.player.x + xdiff,
-                y: this.player.y + ydiff,
-                hspeed: Math.random() * (-xdiff / 10),
-                vspeed: Math.random() * (-ydiff / 10)
-            });
-            this.scene.addObject(boulder);
-            this.boulders.push(boulder);
+        if (this.player.shouldTick) {
+            this._pBoulderTime -= delta;
+            while (this._pBoulderTime < 0) {
+                this._pBoulderTime += this.playerBoulderRepeat;
+                let xdiff = Math.random() * -30;
+                let ydiff = Math.random() * -60 - 30;
+                let boulder = new BoulderObject({
+                    x: this.player.x + xdiff,
+                    y: this.player.y + ydiff,
+                    hspeed: Math.random() * (-xdiff / 10),
+                    vspeed: Math.random() * (-ydiff / 10)
+                });
+                this.scene.addObject(boulder);
+                this.boulders.push(boulder);
+            }
         }
         
         this._mBoulderTime -= delta;

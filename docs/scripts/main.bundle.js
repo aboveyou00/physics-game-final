@@ -6952,19 +6952,21 @@ var BoulderControllerObject = (function (_super) {
     }
     BoulderControllerObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
-        this._pBoulderTime -= delta;
-        while (this._pBoulderTime < 0) {
-            this._pBoulderTime += this.playerBoulderRepeat;
-            var xdiff = Math.random() * -30;
-            var ydiff = Math.random() * -60 - 30;
-            var boulder = new boulder_1.BoulderObject({
-                x: this.player.x + xdiff,
-                y: this.player.y + ydiff,
-                hspeed: Math.random() * (-xdiff / 10),
-                vspeed: Math.random() * (-ydiff / 10)
-            });
-            this.scene.addObject(boulder);
-            this.boulders.push(boulder);
+        if (this.player.shouldTick) {
+            this._pBoulderTime -= delta;
+            while (this._pBoulderTime < 0) {
+                this._pBoulderTime += this.playerBoulderRepeat;
+                var xdiff = Math.random() * -30;
+                var ydiff = Math.random() * -60 - 30;
+                var boulder = new boulder_1.BoulderObject({
+                    x: this.player.x + xdiff,
+                    y: this.player.y + ydiff,
+                    hspeed: Math.random() * (-xdiff / 10),
+                    vspeed: Math.random() * (-ydiff / 10)
+                });
+                this.scene.addObject(boulder);
+                this.boulders.push(boulder);
+            }
         }
         this._mBoulderTime -= delta;
         while (this._mBoulderTime < 0) {
@@ -7083,9 +7085,6 @@ var FloorCheckPlayerObject = (function (_super) {
                 break;
             }
         }
-        if (this.x + 2 > this.scene.camera.clampRight) {
-            this.game.changeScene(this.scene.parentScene);
-        }
         var _a;
     };
     return FloorCheckPlayerObject;
@@ -7103,13 +7102,19 @@ var PlayerObject = (function (_super) {
         _this.MOVE_FORCE_MAGNITUDE = .5;
         _this.isAlive = true;
         _this.isOnFloor = true;
-        _this.mask = new engine_1.CircleCollisionMask(_this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
         return _this;
     }
     PlayerObject.prototype.addToScene = function (scene) {
         _super.prototype.addToScene.call(this, scene);
         this.scene.addObject(new SquishyPlayerObject(this));
         this.scene.addObject(new FloorCheckPlayerObject(this));
+    };
+    PlayerObject.prototype.init = function () {
+        this.mask = new engine_1.CircleCollisionMask(this, 32 / exports.SCALE, [0, -32 / exports.SCALE]);
+        this.shouldRender = true;
+        this.shouldTick = true;
+        this.isAlive = true;
+        this.isOnFloor = false;
     };
     PlayerObject.prototype.handleEvent = function (e) {
         if (_super.prototype.handleEvent.call(this, e))
@@ -7136,6 +7141,9 @@ var PlayerObject = (function (_super) {
                 hdelta *= .2;
             var hforce = hdelta * this.MOVE_FORCE_MAGNITUDE;
             this.mask.addForce(hforce, this.isOnFloor ? Math.abs(hforce) * .2 : 0);
+            if (this.x - 2 > this.scene.camera.clampRight) {
+                this.scene.removeObject(this);
+            }
         }
     };
     return PlayerObject;
@@ -7168,11 +7176,16 @@ var StatusOverlayObject = (function (_super) {
             renderCamera: 'none'
         }) || this;
         _this.player = player;
+        player.shouldRender = true;
+        player.shouldTick = false;
         return _this;
     }
     StatusOverlayObject.prototype.tick = function (delta) {
         _super.prototype.tick.call(this, delta);
         this.bringToFront();
+        if (!this.player.shouldTick && this.animationAge > 2) {
+            this.player.init();
+        }
     };
     StatusOverlayObject.prototype.renderImpl = function (adapter) {
         if (adapter instanceof engine_1.DefaultGraphicsAdapter)
@@ -7191,6 +7204,37 @@ var StatusOverlayObject = (function (_super) {
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             context.fillText('You Lose!', canvasWidth / 2, canvasHeight / 2);
+            context.fillStyle = 'white';
+            context.font = '24px Cambria';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText('Press escape to return to menu', canvasWidth / 2, (canvasHeight / 2) + 80);
+        }
+        else if (!this.player.scene) {
+            context.fillStyle = 'rgba(0, 0, 0, .6)';
+            context.fillRect(0, (canvasHeight / 2) - 200, canvasWidth, 400);
+            context.fillStyle = 'white';
+            context.font = '120px Cambria';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText('You Win!', canvasWidth / 2, canvasHeight / 2);
+            context.fillStyle = 'white';
+            context.font = '24px Cambria';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText('Press escape to return to menu', canvasWidth / 2, (canvasHeight / 2) + 80);
+        }
+        else if (this.animationAge < 3) {
+            context.fillStyle = 'rgba(0, 0, 0, .6)';
+            context.fillRect(0, (canvasHeight / 2) - 200, canvasWidth, 400);
+            context.fillStyle = 'white';
+            context.font = '120px Cambria';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            var text = this.animationAge < 1 ? 'Ready...' :
+                this.animationAge < 2 ? 'Set...' :
+                    'Go!';
+            context.fillText(text, canvasWidth / 2, canvasHeight / 2);
         }
     };
     return StatusOverlayObject;
