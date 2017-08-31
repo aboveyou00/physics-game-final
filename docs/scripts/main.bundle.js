@@ -7465,6 +7465,7 @@ var player_1 = __webpack_require__(55);
 var mountain_1 = __webpack_require__(21);
 var boulder_controller_1 = __webpack_require__(54);
 var status_overlay_1 = __webpack_require__(56);
+var spring_follow_1 = __webpack_require__(62);
 var speed_scale_camera_1 = __webpack_require__(43);
 var stack_scene_1 = __webpack_require__(3);
 var StartScene = (function (_super) {
@@ -7501,12 +7502,14 @@ var StartScene = (function (_super) {
         var playerBoulderRepeat = (this.level && this.level.player && this.level.player.boulderRepeat) || undefined;
         var mountainBoulderRepeat = (this.level && this.level.mountain.boulderRepeat) || undefined;
         var boulderController = new boulder_controller_1.BoulderControllerObject(player, mountain, playerBoulderRepeat, mountainBoulderRepeat);
+        var screenShake = new spring_follow_1.SpringFollowObject(player);
         var backdrop = new backdrop_1.BackdropObject(mountain);
         var statusOverlay = new status_overlay_1.StatusOverlayObject(player);
         this.addObject(backdrop);
         this.addObject(mountain);
         this.addObject(player);
         this.addObject(boulderController);
+        this.addObject(screenShake);
         this.addObject(statusOverlay);
         if (!this.level) {
             var data_1 = mountain.data;
@@ -7520,7 +7523,7 @@ var StartScene = (function (_super) {
         camera.clampLeft = mountain.data[0][0];
         camera.clampRight = mountain.data[mountain.data.length - 1][0];
         camera.floorCenterPosition = false;
-        camera.follow = player;
+        camera.follow = screenShake;
         camera.clearColor = '';
         camera.maxZoomScale = 400;
         camera.minZoomScale = 1;
@@ -7584,6 +7587,57 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 61 */,
+/* 62 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var engine_1 = __webpack_require__(0);
+var SpringFollowObject = (function (_super) {
+    __extends(SpringFollowObject, _super);
+    function SpringFollowObject(player) {
+        var _this = _super.call(this, 'SpringFollow', { shouldRender: false }) || this;
+        _this.player = player;
+        _this.spring = null;
+        _this.SCREEN_SHAKE_AMOUNT = .5;
+        return _this;
+    }
+    SpringFollowObject.prototype.addToScene = function (scene) {
+        _super.prototype.addToScene.call(this, scene);
+        _a = [this.player.x, this.player.y], this.x = _a[0], this.y = _a[1];
+        this.mask = new engine_1.CircleCollisionMask(this, .2);
+        this.mask.isTrigger = true;
+        this.mask.isFixed = true;
+        var _a;
+    };
+    SpringFollowObject.prototype.tick = function (delta) {
+        _super.prototype.tick.call(this, delta);
+        if (!this.spring && this.player.mask) {
+            var spring = this.spring = new engine_1.SpringForceGenerator(this.player.mask, 5000, 0);
+            this.mask.addForceGenerator(spring);
+            this.mask.addForceGenerator(new engine_1.DragForceGenerator(10, 20));
+            spring.modifyOther = false;
+            this.mask.isFixed = false;
+        }
+    };
+    return SpringFollowObject;
+}(engine_1.GameObject));
+exports.SpringFollowObject = SpringFollowObject;
 
 
 /***/ })

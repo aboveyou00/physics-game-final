@@ -4,6 +4,7 @@ import { PlayerObject, SCALE } from '../objects/player';
 import { MountainObject } from '../objects/mountain';
 import { BoulderControllerObject } from '../objects/boulder-controller';
 import { StatusOverlayObject } from '../objects/status-overlay';
+import { SpringFollowObject } from '../objects/spring-follow';
 import { SpeedScaleCamera } from '../cameras/speed-scale-camera';
 import { StackScene } from '../stack-scene';
 import { LevelMeta } from '../dbs/level.db';
@@ -44,6 +45,8 @@ export class StartScene extends StackScene {
         let playerBoulderRepeat = (this.level && this.level.player && this.level.player.boulderRepeat) || undefined;
         let mountainBoulderRepeat = (this.level && this.level.mountain.boulderRepeat) || undefined;
         let boulderController = new BoulderControllerObject(player, mountain, playerBoulderRepeat, mountainBoulderRepeat);
+        
+        let screenShake = new SpringFollowObject(player);
 
         let backdrop = new BackdropObject(mountain);
         let statusOverlay = new StatusOverlayObject(player);
@@ -52,6 +55,7 @@ export class StartScene extends StackScene {
         this.addObject(mountain);
         this.addObject(player);
         this.addObject(boulderController);
+        this.addObject(screenShake);
         this.addObject(statusOverlay);
 
         if (!this.level) {
@@ -77,7 +81,7 @@ export class StartScene extends StackScene {
         camera.clampLeft = mountain.data[0][0];
         camera.clampRight = mountain.data[mountain.data.length - 1][0];
         camera.floorCenterPosition = false;
-        camera.follow = player;
+        camera.follow = screenShake;
         camera.clearColor = '';
         camera.maxZoomScale = 400;
         camera.minZoomScale = 1;
