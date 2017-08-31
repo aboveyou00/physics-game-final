@@ -6199,11 +6199,21 @@ var SpeedScaleCamera = (function (_super) {
     __extends(SpeedScaleCamera, _super);
     function SpeedScaleCamera(scene) {
         var _this = _super.call(this, scene) || this;
+        _this.shakeAmt = 1.5;
         _this.zoomScaleTo = 30;
         _this.fixedTickTime = 1 / 30;
+        _this.timeUntilNext = 0;
         return _this;
     }
     SpeedScaleCamera.prototype.tick = function (delta) {
+        this.timeUntilNext -= delta;
+        if (this.timeUntilNext <= 0) {
+            this.shakeAmt = Math.random() * .3;
+            this.timeUntilNext = .2;
+        }
+        console.log(this.shakeAmt);
+        var amt = Math.pow(this.shakeAmt, 2) * 6;
+        this.followOffset = [((Math.random() * 2) - 1) * amt, ((Math.random() * 2) - 1) * amt];
         _super.prototype.tick.call(this, delta);
         if (this.follow) {
             var zst = 32 - Math.sqrt(this.follow.speed + 16) / 2;
